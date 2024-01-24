@@ -21,9 +21,6 @@ void testgetalnum();
 int sgetalnum(char **s, char *word, int lim);
 void testsgetalnum(char *s);
 
-/* ismathexpr: isalsnum + '.' + '-' */
-int ismathexpr(char c);
-
 /* getwordg: getword generalized, accepting an arbitrary criteria of acceptable characters in word */
 int getwordg(char *word, int lim, int (*crit)(char ));
 void testgetwordg(int (*crit)(char ));
@@ -31,5 +28,8 @@ void testgetwordg(int (*crit)(char ));
 /* sgetwordg: getwordg from string while reducing it */
 int sgetwordg(char **s, char *word, int lim, int (*crit)(char ));
 void testsgetwordg(char *s, int (*crit)(char ));
+
+/* ismathexpr: isalsnum + '.' + '-' */
+int ismathexpr(char c);
 
 #endif	/* GETWORD_H */
