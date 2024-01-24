@@ -56,4 +56,8 @@ void testbrackword(void);
 char *braceword(char *);
 void testbraceword(void);
 
+/* strstrmask: mask part of the string with delimiters */
+char *strstrmask(char *line, char *word, char *pre, char *suf);
+void teststrstrmask(char *pre, char *suf);
+
 #endif	/* GETWORD_H */

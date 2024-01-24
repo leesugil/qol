@@ -210,6 +210,7 @@ char *shrknstr(char *s, unsigned int n)
 		for (i = n; i < strlen(s) - n; i++)
 			output[i-n] = s[i];
 		output[i-n] = '\0';
+		fprintf(stderr, "shrknstr: *** strdup used in the return, free it after use ***\n");
 		return strdup(output);
 	} else {
 		fprintf(stderr, "shrknstr: error, n too large\n");
@@ -242,6 +243,7 @@ char *wrapword(char *word, char *pre, char *suf)
 
 	sprintf(output, "%s%s%s", pre, word, suf);
 
+	fprintf(stderr, "wrapword: *** strdup used in the return, free it after use ***\n");
 	return strdup(output);
 }
 void testwrapword(char *pre, char *suf)
@@ -285,6 +287,39 @@ void testbraceword(void)
 	char *word = "test word";
 	printf("input: \"%s\"\n", word);
 	printf("output: \"%s\"\n", braceword(word));
+}
+
+/* reverse: reverses a mutable string. for immutables, use with strdup. */
+void reverse(char s[])
+{
+	int c, i, j;
+
+	for (i=0, j=strlen(s)-1; i<j; i++, j--)
+		c = s[i], s[i] = s[j], s[j] = c;
+}
+
+/* strstrmask: mask part of the string with delimiters */
+char *strstrmask(char *line, char *word, char *pre, char *suf)
+{
+	char *test_line = strdup(line);
+	fprintf(stderr, "strstrmask: *** strdup used in the return, free it after use ***\n");
+	char *pre_loc, *suf_loc;
+	int i, j;
+
+	/* get the first occurence of *pre */
+	if ((pre_loc = strstr(test_line, pre)) == NULL) {
+		fprintf(stderr, "strstrmask: \"%s\" not detected.\n", pre);
+		return strstr(line, word);
+	}
+
+	/* get the last occuruence of *suf */
+	for (i = strlen(suf) - 1; i >= 0; i--) {
+	}
+
+	/* mask the block */
+}
+void teststrstrmask(char *pre, char *suf)
+{
 }
 
 #endif	/* _GETWORD_H */
