@@ -56,6 +56,10 @@ void testbrackword(void);
 char *braceword(char *);
 void testbraceword(void);
 
+/* strrstr: strstr reversed. */
+char *strrstr(char *line, char *word);
+void teststrrstr(void);
+
 /* strstrmask: mask part of the string with delimiters */
 char *strstrmask(char *line, char *word, char *pre, char *suf);
 void teststrstrmask(char *pre, char *suf);

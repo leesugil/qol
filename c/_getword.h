@@ -7,6 +7,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <ctype.h>
+#include <stdlib.h>
 
 /* getword: get next word or character from input */
 int getword(char *word, int lim)
@@ -298,13 +299,33 @@ void reverse(char s[])
 		c = s[i], s[i] = s[j], s[j] = c;
 }
 
+/* strrstr: strstr reversed */
+char *strrstr(char *line, char *word)
+{
+	int m = strlen(word), n = strlen(line);
+	int i;
+	char *p;
+
+	for (i = n-m; i >= 0; i--, p = line+i)
+		if ((strstr(p, word)) != NULL)
+			return p;
+
+	return NULL;
+}
+void teststrrstr(void)
+{
+	char *line = "Hello, World, Hello!";
+	char *word = "Hello";
+	printf("line: \"%s\"\n", line);
+	printf("word: \"%s\"\n", word);
+	printf("strrstr: \"%s\"\n", strrstr(line, word));
+}
+
 /* strstrmask: mask part of the string with delimiters */
 char *strstrmask(char *line, char *word, char *pre, char *suf)
 {
 	char *test_line = strdup(line);
-	fprintf(stderr, "strstrmask: *** strdup used in the return, free it after use ***\n");
 	char *pre_loc, *suf_loc;
-	int i, j;
 
 	/* get the first occurence of *pre */
 	if ((pre_loc = strstr(test_line, pre)) == NULL) {
@@ -313,10 +334,13 @@ char *strstrmask(char *line, char *word, char *pre, char *suf)
 	}
 
 	/* get the last occuruence of *suf */
-	for (i = strlen(suf) - 1; i >= 0; i--) {
-	}
+	char *dummy = strstr(test_line, suf);
 
 	/* mask the block */
+
+	free(test_line);
+
+	return NULL;
 }
 void teststrstrmask(char *pre, char *suf)
 {
