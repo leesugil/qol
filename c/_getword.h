@@ -240,13 +240,7 @@ char *wrapword(char *word, char *pre, char *suf)
 	char output[l];
 	int i, j = 0;
 
-	for (i = 0; i < strlen(pre); i++, j++)
-		output[j] = pre[i];
-	for (i = 0; i < strlen(word); i++, j++)
-		output[j] = word[i];
-	for (i = 0; i < strlen(suf); i++, j++)
-		output[j] = suf[i];
-	output[j] = '\0';
+	sprintf(output, "%s%s%s", pre, word, suf);
 
 	return strdup(output);
 }
