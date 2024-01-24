@@ -5,6 +5,8 @@
 
 #include <ctype.h>
 #include <stdio.h>
+#include <string.h>
+#include <ctype.h>
 
 /* getword: get next word or character from input */
 int getword(char *word, int lim)
@@ -195,6 +197,40 @@ void testsgetwordg(char *s, int (*crit)(char ))
 	char word[maxchar];
 	while (sgetwordg(&s, word, maxchar, crit) != '\0')
 		fprintf(stderr, "\"%s\"\n", word);
+}
+
+/* shrknstr: removes the first and last n characters of a string */
+char *shrknstr(char *s, unsigned int n)
+{
+	int l = strlen(s) - 2 * n + 1;
+	char output[l];
+	int i;
+
+	if (l > 0) {
+		for (i = n; i < strlen(s) - n; i++)
+			output[i-n] = s[i];
+		output[i-n] = '\0';
+		return strdup(output);
+	} else {
+		fprintf(stderr, "shrknstr: error, n too large\n");
+		return NULL;
+	}
+}
+void testshrknstr(unsigned n)
+{
+	char *s = "123456789";
+	printf("input: \"%s\", n = %u\n", s, n);
+	printf("output: \"%s\"\n", shrknstr(s, n));
+}
+
+/* shrkstr: removes the first and last character of a string */
+char *shrkstr(char *s)
+{
+	return shrknstr(s, 1);
+}
+void testshrkstr(void)
+{
+	testshrknstr(1);
 }
 
 #endif	/* _GETWORD_H */

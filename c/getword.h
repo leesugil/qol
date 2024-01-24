@@ -32,4 +32,12 @@ void testsgetwordg(char *s, int (*crit)(char ));
 /* ismathexpr: isalsnum + '.' + '-' */
 int ismathexpr(char c);
 
+/* shrkstr: removes the first and last character of a string */
+char *shrkstr(char *);
+void testshrkstr(void);
+
+/* shrknstr: removes the first and last n characters of a string. */
+char *shrknstr(char *s, unsigned int n);
+void testshrknstr(unsigned int n);
+
 #endif	/* GETWORD_H */
