@@ -15,7 +15,7 @@ void testsgetword(char *s);
 
 /* getalnum: get next word or character or number from input */
 int getalnum(char *word, int lim);
-void testgetalnum();
+void testgetalnum(void);
 
 /* sgetalnum: getalnum from string while reducing it */
 int sgetalnum(char **s, char *word, int lim);
@@ -39,5 +39,21 @@ void testshrkstr(void);
 /* shrknstr: removes the first and last n characters of a string. */
 char *shrknstr(char *s, unsigned int n);
 void testshrknstr(unsigned int n);
+
+/* wrapword: places characters around a string */
+char *wrapword(char *, char *, char *);
+void testwrapword(char *, char *);
+
+/* parenthword: parenthesize a word */
+char *parenthword(char *);
+void testparenthword(void);
+
+/* brackword: bracket a word */
+char *brackword(char *);
+void testbrackword(void);
+
+/* braceword: parenthesize a word */
+char *braceword(char *);
+void testbraceword(void);
 
 #endif	/* GETWORD_H */

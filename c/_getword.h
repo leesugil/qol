@@ -233,4 +233,64 @@ void testshrkstr(void)
 	testshrknstr(1);
 }
 
+/* wrapword: places characters around a string */
+char *wrapword(char *word, char *pre, char *suf)
+{
+	unsigned int l = strlen(pre) + strlen(word) + strlen(suf) + 1;
+	char output[l];
+	int i, j = 0;
+
+	for (i = 0; i < strlen(pre); i++, j++)
+		output[j] = pre[i];
+	for (i = 0; i < strlen(word); i++, j++)
+		output[j] = word[i];
+	for (i = 0; i < strlen(suf); i++, j++)
+		output[j] = suf[i];
+	output[j] = '\0';
+
+	return strdup(output);
+}
+void testwrapword(char *pre, char *suf)
+{
+	char *word = "test word";
+	printf("input: \"%s\"\n", word);
+	printf("output: \"%s\"\n", wrapword(word, pre, suf));
+}
+
+/* parenthword: parenthesize a word */
+char *parenthword(char *word)
+{
+	return wrapword(word, "(", ")");
+}
+void testparenthword(void)
+{
+	char *word = "test word";
+	printf("input: \"%s\"\n", word);
+	printf("output: \"%s\"\n", parenthword(word));
+}
+
+/* brackword: bracket a word */
+char *brackword(char *word)
+{
+	return wrapword(word, "[", "]");
+}
+void testbrackword(void)
+{
+	char *word = "test word";
+	printf("input: \"%s\"\n", word);
+	printf("output: \"%s\"\n", brackword(word));
+}
+
+/* braceword: parenthesize a word */
+char *braceword(char *word)
+{
+	return wrapword(word, "{", "}");
+}
+void testbraceword(void)
+{
+	char *word = "test word";
+	printf("input: \"%s\"\n", word);
+	printf("output: \"%s\"\n", braceword(word));
+}
+
 #endif	/* _GETWORD_H */
