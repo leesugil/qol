@@ -42,18 +42,10 @@ Node *addNode(Node *p, char *name)
 /* listNode: in-order print of tree p */
 void listNode(Node *p)
 {
-	static unsigned int tab = 0;
-	unsigned int tab_size = 4;
-	int i;
-
 	if (p != NULL) {
-		for (i = 0; i < tab; i++)
-			printf(" ");
-		printf("%s\n", p->name);
-		tab += tab_size;
 		listNode(p->left);
+		printf("%s\n", p->name);
 		listNode(p->right);
-		tab -= tab_size;
 	}
 }
 
