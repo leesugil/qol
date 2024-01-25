@@ -67,10 +67,10 @@ Node *getNode(Node *p, char *name)
 	else if ((cond = strcmp(name, p->name)) == 0)
 		return p;
 	else if (cond < 0) {
-		fprintf(stderr, "lookUpNode: taking left from p->name: %s\n", p->name);
+		fprintf(stderr, "getNode: taking left from p->name: %s\n", p->name);
 		return getNode(p->left, name);
 	} else {
-		fprintf(stderr, "lookUpNode: taking right from p->name: %s\n", p->name);
+		fprintf(stderr, "getNode: taking right from p->name: %s\n", p->name);
 		return getNode(p->right, name);
 	}
 }
