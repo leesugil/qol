@@ -321,35 +321,65 @@ void teststrrstr(void)
 	printf("strrstr: \"%s\"\n", strrstr(line, word));
 }
 
+/* strstrmaskblk: bulk strstrmask applied to l delimeter sets */
+char *strstrmaskblk(char *line, char *word, char **pre, char **suf, unsigned int l)
+{
+	char *pre_loc, *suf_loc, *p;
+	int i, j = 0;
+
+	pre_loc = line + strlen(line);
+
+	/* get the first occurence of **pre */
+	for (i = 0; i < l; i++) {
+		if ((p = strstr(line, pre[i])) != NULL) {
+			if (p < pre_loc) {
+				fprintf(stderr, "strstrmaskblk: pre \"%s\" detected.\n", pre[i]);
+				pre_loc = p;
+				j = i;
+			}
+		}
+	}
+	fprintf(stderr, "strstrmaskblk: pre \"%s\", pre_loc \"%s\".\n", pre[j], pre_loc);
+	if ((suf_loc = strrstr(pre_loc, suf[j])) != NULL ) {
+		fprintf(stderr, "strstrmaskblk: suf \"%s\", suf_loc \"%s\".\n", suf[j], suf_loc);
+		return strstr(suf_loc, word);
+	}
+	fprintf(stderr, "strstrmaskblk: nothing masked\n");
+
+	return strstr(line, word);
+}
+void teststrstrmaskblk(void)
+{
+	char *line = "Hello, [(World), Hello, World,] Hello, World, Hello!";
+	char *word = "World";
+	char *pre[] = {
+		"(",
+		"[",
+		"{"
+	};
+	char *suf[] = {
+		")",
+		"]",
+		"}"
+	};
+	int i, l = sizeof(pre) / sizeof(pre[0]);
+
+	printf("line: \"%s\"\n", line);
+	printf("word: \"%s\"\n", word);
+	printf("strstr: \"%s\"\n", strstr(line, word));
+	for (i = 0; i < l; i++)
+		printf("pre: \"%s\", suf: \"%s\"\n", pre[i], suf[i]);
+	printf("teststrstrmaskblk: \"%s\"\n", strstrmaskblk(line, word, pre, suf, l));
+}
+
 /* strstrmask: mask part of the string with delimiters */
 char *strstrmask(char *line, char *word, char *pre, char *suf)
 {
-	char *pre_loc, *suf_loc;
-
-	/* get the first occurence of *pre */
-	if ((pre_loc = strstr(line, pre)) == NULL) {
-		fprintf(stderr, "strstrmask: \"%s\" not detected.\n", pre);
-		return strstr(line, word);
-	}
-
-	/* get the last occuruence of *suf */
-	if ((suf_loc = strrstr(line, suf)) == NULL) {
-		fprintf(stderr, "strstrmask: \"%s\" not detected.\n", suf);
-		return strstr(line, word);
-	}
-
-	/* mask the block */
-	if (pre_loc < suf_loc) {
-		/* main code */
-		return strstr(suf_loc, word);
-	} else {
-		fprintf(stderr, "strstrmask: suf(%s) appeearing ahead of pre(%s) in line(%s)\n", suf, pre, line);
-		return strstr(line, word);
-	}
+	return strstrmaskblk(line, word, &pre, &suf, 1);
 }
 void teststrstrmask(void)
 {
-	char *line = "Hello, (World), Hello!";
+	char *line = "Hello, (World), Hello, World, Hello!";
 	char *word = "World";
 	char *pre = "(";
 	char *suf = ")";
