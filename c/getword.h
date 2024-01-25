@@ -62,6 +62,6 @@ void teststrrstr(void);
 
 /* strstrmask: mask part of the string with delimiters */
 char *strstrmask(char *line, char *word, char *pre, char *suf);
-void teststrstrmask(char *pre, char *suf);
+void teststrstrmask(void);
 
 #endif	/* GETWORD_H */

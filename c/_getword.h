@@ -324,26 +324,41 @@ void teststrrstr(void)
 /* strstrmask: mask part of the string with delimiters */
 char *strstrmask(char *line, char *word, char *pre, char *suf)
 {
-	char *test_line = strdup(line);
 	char *pre_loc, *suf_loc;
 
 	/* get the first occurence of *pre */
-	if ((pre_loc = strstr(test_line, pre)) == NULL) {
+	if ((pre_loc = strstr(line, pre)) == NULL) {
 		fprintf(stderr, "strstrmask: \"%s\" not detected.\n", pre);
 		return strstr(line, word);
 	}
 
 	/* get the last occuruence of *suf */
-	char *dummy = strstr(test_line, suf);
+	if ((suf_loc = strrstr(line, suf)) == NULL) {
+		fprintf(stderr, "strstrmask: \"%s\" not detected.\n", suf);
+		return strstr(line, word);
+	}
 
 	/* mask the block */
-
-	free(test_line);
-
-	return NULL;
+	if (pre_loc < suf_loc) {
+		/* main code */
+		return strstr(suf_loc, word);
+	} else {
+		fprintf(stderr, "strstrmask: suf(%s) appeearing ahead of pre(%s) in line(%s)\n", suf, pre, line);
+		return strstr(line, word);
+	}
 }
-void teststrstrmask(char *pre, char *suf)
+void teststrstrmask(void)
 {
+	char *line = "Hello, (World), Hello!";
+	char *word = "World";
+	char *pre = "(";
+	char *suf = ")";
+
+	printf("line: \"%s\"\n", line);
+	printf("word: \"%s\"\n", word);
+	printf("strstr: \"%s\"\n", strstr(line, word));
+	printf("pre: \"%s\", suf: \"%s\"\n", pre, suf);
+	printf("strstrmask: \"%s\"\n", strstrmask(line, word, pre, suf));
 }
 
 #endif	/* _GETWORD_H */
