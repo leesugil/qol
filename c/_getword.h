@@ -360,7 +360,7 @@ char *strstrmaskblk(char *line, char *word, char **pre, char **suf, unsigned int
 }
 void teststrstrmaskblk(void)
 {
-	char *line = "((x + y) * (y + z))";
+	char *line = "(x + y) * (y + z)";
 	char *word = "y";
 	char *pre[] = { "(", "[", "{" };
 	char *suf[] = { ")", "]", "}" };
