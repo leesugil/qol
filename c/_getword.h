@@ -331,36 +331,72 @@ void teststrrstr(void)
 	 * which the middle operator '*' shouldn't be masked in the math sense */
 char *strstrmaskblk(char *line, char *word, char **pre, char **suf, unsigned int l)
 {
-	char *pre_loc, *suf_loc, *p;
-	int i, j = 0;
+	char *p, *q, *r;
+	int i, j = 0, c = 0;
 
-	pre_loc = line + strlen(line);
+	q = line + strlen(line);
 
 	/* get the first occurence of **pre */
 	for (i = 0; i < l; i++)
-		if ((p = strstr(line, pre[i])) != NULL)
-			if (p < pre_loc) {
+		if ((p = strstr(line, pre[i])) != NULL) {
+			if (p < q) {
 				fprintf(stderr, "strstrmaskblk: pre \"%s\" detected.\n", pre[i]);
-				pre_loc = p;
+				q = p;
 				j = i;
 			}
-	fprintf(stderr, "strstrmaskblk: pre \"%s\", pre_loc \"%s\".\n", pre[j], pre_loc);
-	/* pre[j] makes the first occurnce of **pre,
-	 * next is to count how many times pre[j] occurs in line,
-	 * so that we know when pre[j] is properly closed with suf[j] */
+			if (c == 0)
+				c++;
+		}
+	fprintf(stderr, "strstrmaskblk: pre[%d] =  \"%s\", detected at \"%s\".\n", j, pre[j], q);
 
-	/* get the last occurence of the matching str in **suf */
-	if ((suf_loc = strrstr(pre_loc, suf[j])) != NULL ) {
-		fprintf(stderr, "strstrmaskblk: suf \"%s\", suf_loc \"%s\".\n", suf[j], suf_loc);
-		return strstr(suf_loc, word);
+	/* check if parentheses are properly placed? - future project. */
+
+	/* count occurence of pre[j] and suf[j] */
+	if ((p = strstr(line, pre[j]) + strlen(pre[j])) != NULL) {
+		/* c = 1 already */
+		while (c > 0) {
+			q = strstr(p, pre[j]);
+			r = strstr(p, suf[j]);
+			/* q != NULL && r != NULL normal like  * (y + z) */
+			/* q == NULL && r != NULL normal like y + z) */
+			/* q != NULL && r == NULL error */
+			/* q == NULL && r == NULL normal if c == 0 */
+			if (r != NULL) {
+				if (q != NULL) {
+					if (q < r) {
+						c++;
+						p = q + strlen(pre[j]);
+						fprintf(stderr, "strstrmaskblk: c=%d, p=\"%s\"\n", c, p);
+					} else {
+						c--;
+						p = r + strlen(suf[j]);
+						fprintf(stderr, "strstrmaskblk: c=%d, p=\"%s\"\n", c, p);
+					}
+				} else {
+					/* like y + z) */
+					/* shouldn't occur unless there were more pre[j] by a mistake? */
+					fprintf(stderr, "strstrmaskblk: error, there were more %s. no masking applied.\n", pre[j]);
+					return strstr(line, word);
+				}
+			} else {
+				fprintf(stderr, "strstrmaskblk: error, at least %d more %s than %s. no masking applied.\n", c, pre[j], suf[j]);
+				return strstr(line, word);
+			}
+		}
+		/* p should be pointing right after the first block ended, i.e., where the op parsing should start */
+		fprintf(stderr, "strstrmaskblk: line after block: \"%s\"\n", p);
+		p = strstr(p, word);
+		fprintf(stderr, "strstrmaskblk: returning \"%s\"\n", p);
+		return p;
+	} else {
+		/* pre[j] never occurred */
+		fprintf(stderr, "strstrmaskblk: no masking applied.\n");
+		return strstr(line, word);
 	}
-	fprintf(stderr, "strstrmaskblk: nothing masked\n");
-
-	return strstr(line, word);
 }
 void teststrstrmaskblk(void)
 {
-	char *line = "(x + y) * (y + z)";
+	char *line = "((x + y) + y) * (y + z)";
 	char *word = "y";
 	char *pre[] = { "(", "[", "{" };
 	char *suf[] = { ")", "]", "}" };
