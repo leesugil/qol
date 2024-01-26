@@ -533,6 +533,8 @@ char *strstrmaskblk(char *line, char *word, char **pre, char **suf)
 		if (q < r) {
 			/* block entry found */
 			fprintf(stderr, "%s: masking successful\n", prog);
+			fprintf(stderr, "%s: searching \"%s\" in \"%s\"\n", prog, word, p);
+			fprintf(stderr, "%s: \"%s\"\n", prog, strstr(p, word));
 			return strstr(p, word);
 		}
 
@@ -541,8 +543,8 @@ char *strstrmaskblk(char *line, char *word, char **pre, char **suf)
 }
 void teststrstrmaskblk(void)
 {
-	char *line = "y * ((x + y) + y) * (y + z)";
-	char *word = "y";
+	char *line = "((x + y) + y)^(y + z)";
+	char *word = " + ";
 	char *pre[] = { "(", "[", "{", NULL };
 	char *suf[] = { ")", "]", "}", NULL };
 	int i;
