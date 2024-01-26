@@ -513,15 +513,18 @@ void testpastblock(void)
 char *strstrmaskblk(char *line, char *word, char **pre, char **suf)
 {
 	/* ((x + y) + (y + z)) */
+	char *prog = "strstrmaskblk";
 	int j;
 	char *p = pastblock(line, pre, suf);
 	char *q = strstrblk(line, pre, &j);
 	char *r = strstr(line, word);
 
 	if (q < r) {
-		/* strstr(line, word) could be wrong, need to apply strstr to p */
+		/* block entry found */
+		fprintf(stderr, "%s: masking successful\n", prog);
 		return strstr(p, word);
 	}
+	fprintf(stderr, "%s: \"%s\" found early, masking not needed\n", prog, word);
 	return r;
 }
 void teststrstrmaskblk(void)
