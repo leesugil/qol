@@ -514,6 +514,10 @@ char *strstrmaskblk(char *line, char *word, char **pre, char **suf)
 {
 	/* ((x + y) + (y + z)) */
 	char *prog = "strstrmaskblk";
+
+	if (line == NULL || word == NULL)
+		return NULL;
+
 	int j;
 	fprintf(stderr, "%s: calling pastblock\n", prog);
 	char *p = pastblock(line, pre, suf);
@@ -522,13 +526,17 @@ char *strstrmaskblk(char *line, char *word, char **pre, char **suf)
 	fprintf(stderr, "%s: calling strstr\n", prog);
 	char *r = strstr(line, word);
 
-	if (q < r) {
-		/* block entry found */
-		fprintf(stderr, "%s: masking successful\n", prog);
-		return strstr(p, word);
-	}
+	if (r == NULL) {
+		fprintf(stderr, "%s: nothing found.\n", prog);
+		return r;
+	} else if (q != NULL)
+		if (q < r) {
+			/* block entry found */
+			fprintf(stderr, "%s: masking successful\n", prog);
+			return strstr(p, word);
+		}
+
 	fprintf(stderr, "%s: \"%s\" found early, masking not needed\n", prog, word);
-	/* this message shows up when " - " was not found */
 	return r;
 }
 void teststrstrmaskblk(void)
