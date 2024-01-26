@@ -380,7 +380,7 @@ char *pastblock(char *line, char **pre, char **suf)
 					/* like y + z) or y + z)) */
 					/* shouldn't occur unless there were more pre[j] by a mistake?? */
 					fprintf(stderr, "%s: error, there were more %s. there's a chance that the entire line is blocked. trying with shrkstr(line).\n", prog, pre[j]);
-					return pastblock(shrkstr(line), pre, suf);
+					return pastblock(shrknstr(line, strlen(pre[j])), pre, suf);
 				}
 			} else {
 				fprintf(stderr, "%s: error, at least %d more %s than %s. no masking applied.\n", prog, c, pre[j], suf[j]);
