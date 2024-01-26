@@ -235,8 +235,8 @@ void testshrkstr(void)
 	testshrknstr(1);
 }
 
-/* wrapword: places characters around a string */
-char *wrapword(char *word, char *pre, char *suf)
+/* wrapstr: places characters around a string */
+char *wrapstr(char *word, char *pre, char *suf)
 {
 	unsigned int l = strlen(pre) + strlen(word) + strlen(suf) + 1;
 	char output[l];
@@ -247,47 +247,47 @@ char *wrapword(char *word, char *pre, char *suf)
 	fprintf(stderr, "wrapword: *** strdup used in the return, free it after use ***\n");
 	return strdup(output);
 }
-void testwrapword(char *pre, char *suf)
+void testwrapstr(char *pre, char *suf)
 {
 	char *word = "test word";
 	printf("input: \"%s\"\n", word);
-	printf("output: \"%s\"\n", wrapword(word, pre, suf));
+	printf("output: \"%s\"\n", wrapstr(word, pre, suf));
 }
 
-/* parenthword: parenthesize a word */
-char *parenthword(char *word)
+/* parenthstr: abc -> (abc) */
+char *parenthstr(char *word)
 {
-	return wrapword(word, "(", ")");
+	return wrapstr(word, "(", ")");
 }
-void testparenthword(void)
+void testparenthstr(void)
 {
 	char *word = "test word";
 	printf("input: \"%s\"\n", word);
-	printf("output: \"%s\"\n", parenthword(word));
+	printf("output: \"%s\"\n", parenthstr(word));
 }
 
-/* brackword: bracket a word */
-char *brackword(char *word)
+/* brackstr: abd -> [abc] */
+char *brackstr(char *word)
 {
-	return wrapword(word, "[", "]");
+	return wrapstr(word, "[", "]");
 }
-void testbrackword(void)
+void testbrackstr(void)
 {
 	char *word = "test word";
 	printf("input: \"%s\"\n", word);
-	printf("output: \"%s\"\n", brackword(word));
+	printf("output: \"%s\"\n", brackstr(word));
 }
 
-/* braceword: parenthesize a word */
-char *braceword(char *word)
+/* bracestr: abd -> {abc} */
+char *bracestr(char *word)
 {
-	return wrapword(word, "{", "}");
+	return wrapstr(word, "{", "}");
 }
-void testbraceword(void)
+void testbracestr(void)
 {
 	char *word = "test word";
 	printf("input: \"%s\"\n", word);
-	printf("output: \"%s\"\n", braceword(word));
+	printf("output: \"%s\"\n", bracestr(word));
 }
 
 /* reverse: reverses a mutable string. for immutables, use with strdup. */

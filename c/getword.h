@@ -40,25 +40,39 @@ void testshrkstr(void);
 char *shrknstr(char *s, unsigned int n);
 void testshrknstr(unsigned int n);
 
-/* wrapword: places characters around a string */
-char *wrapword(char *, char *, char *);
-void testwrapword(char *, char *);
+/* wrapstr: places characters around a string */
+char *wrapstr(char *word, char *pre, char *suf);
+void testwrapstr(char *pre, char *suf);
 
-/* parenthword: parenthesize a word */
-char *parenthword(char *);
-void testparenthword(void);
+/* parenthstr: abc -> (abc) */
+char *parenthstr(char *word);
+void testparenthstr(void);
 
-/* brackword: bracket a word */
-char *brackword(char *);
-void testbrackword(void);
+/* brackstr: abd -> [abc] */
+char *brackstr(char *word);
+void testbrackstr(void);
 
-/* braceword: parenthesize a word */
-char *braceword(char *);
-void testbraceword(void);
+/* bracestr: abd -> {abc} */
+char *bracestr(char *word);
+void testbracestr(void);
 
-/* strrstr: strstr reversed. */
+/* reverse: reverses a mutable string. for immutables, use with strdup. */
+void reverse(char s[]);
+
+/* strrstr: strstr reversed */
 char *strrstr(char *line, char *word);
 void teststrrstr(void);
+
+/* strstrblk: get the first occurence among words */
+char *strstrblk(char *line, char **words, unsigned int l, int *j);
+
+/* pastblock: a((bc)de)fg -> fg */
+char *pastblock(char *line, char **pre, char **suf, unsigned int l);
+void testpastblock(void);
+
+/* strstrmaskblk: bulk strstrmask applied to l delimeter sets */
+char *strstrmaskblk(char *line, char *word, char **pre, char **suf, unsigned int l);
+void teststrstrmaskblk(void);
 
 /* strstrmask: mask part of the string with delimiters */
 char *strstrmask(char *line, char *word, char *pre, char *suf);
