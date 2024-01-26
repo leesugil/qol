@@ -306,22 +306,29 @@ char *strrstr(char *line, char *word)
 	int i;
 	char *p;
 
-	for (i = n-m; i >= 0; i--, p = line+i)
+	for (i = n-m; i >= 0; i--) {
+		p = line+i;
 		if ((strstr(p, word)) != NULL)
 			return p;
+	}
 
 	return NULL;
 }
 void teststrrstr(void)
 {
-	char *line = "Hello, World, Hello!";
-	char *word = "Hello";
+	char *line = "((x + y) * (y + z))";
+	char *word = ")";
 	printf("line: \"%s\"\n", line);
 	printf("word: \"%s\"\n", word);
 	printf("strrstr: \"%s\"\n", strrstr(line, word));
 }
 
 /* strstrmaskblk: bulk strstrmask applied to l delimeter sets */
+	/* not for math formula. this one detects the first and the last
+	 * occurence of block parameters, fails to mask terms properly in
+	 * some cases such as
+	 * (x + y) * (y + z)
+	 * which the middle operator '*' shouldn't be masked in the math sense */
 char *strstrmaskblk(char *line, char *word, char **pre, char **suf, unsigned int l)
 {
 	char *pre_loc, *suf_loc, *p;
@@ -330,16 +337,19 @@ char *strstrmaskblk(char *line, char *word, char **pre, char **suf, unsigned int
 	pre_loc = line + strlen(line);
 
 	/* get the first occurence of **pre */
-	for (i = 0; i < l; i++) {
-		if ((p = strstr(line, pre[i])) != NULL) {
+	for (i = 0; i < l; i++)
+		if ((p = strstr(line, pre[i])) != NULL)
 			if (p < pre_loc) {
 				fprintf(stderr, "strstrmaskblk: pre \"%s\" detected.\n", pre[i]);
 				pre_loc = p;
 				j = i;
 			}
-		}
-	}
 	fprintf(stderr, "strstrmaskblk: pre \"%s\", pre_loc \"%s\".\n", pre[j], pre_loc);
+	/* pre[j] makes the first occurnce of **pre,
+	 * next is to count how many times pre[j] occurs in line,
+	 * so that we know when pre[j] is properly closed with suf[j] */
+
+	/* get the last occurence of the matching str in **suf */
 	if ((suf_loc = strrstr(pre_loc, suf[j])) != NULL ) {
 		fprintf(stderr, "strstrmaskblk: suf \"%s\", suf_loc \"%s\".\n", suf[j], suf_loc);
 		return strstr(suf_loc, word);
@@ -350,18 +360,10 @@ char *strstrmaskblk(char *line, char *word, char **pre, char **suf, unsigned int
 }
 void teststrstrmaskblk(void)
 {
-	char *line = "Hello, [(World), Hello, World,] Hello, World, Hello!";
-	char *word = "World";
-	char *pre[] = {
-		"(",
-		"[",
-		"{"
-	};
-	char *suf[] = {
-		")",
-		"]",
-		"}"
-	};
+	char *line = "((x + y) * (y + z))";
+	char *word = "y";
+	char *pre[] = { "(", "[", "{" };
+	char *suf[] = { ")", "]", "}" };
 	int i, l = sizeof(pre) / sizeof(pre[0]);
 
 	printf("line: \"%s\"\n", line);
@@ -379,8 +381,8 @@ char *strstrmask(char *line, char *word, char *pre, char *suf)
 }
 void teststrstrmask(void)
 {
-	char *line = "Hello, (World), Hello, World, Hello!";
-	char *word = "World";
+	char *line = "((x + y) * (y + z))";
+	char *word = "y";
 	char *pre = "(";
 	char *suf = ")";
 
