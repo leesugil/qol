@@ -324,14 +324,14 @@ void teststrrstr(void)
 }
 
 /* strstrblk: get the first occurence among words */
-char *strstrblk(char *line, char **words, unsigned int l, int *j)
+char *strstrblk(char *line, char **words, int *j)
 {
 	char *p, *q;
 	int i;
 
 	q = line + strlen(line);
 	
-	for (i = 0; i < l; i++)
+	for (i = 0; words[i] != NULL; i++)
 		if ((p = strstr(line, words[i])) != NULL)
 			if (p < q) {
 				fprintf(stderr, "strstrblk: word \"%s\" detected.\n", words[i]);
@@ -343,14 +343,15 @@ char *strstrblk(char *line, char **words, unsigned int l, int *j)
 }
 
 /* pastblock: a((bc)de)fg -> fg */
-char *pastblock(char *line, char **pre, char **suf, unsigned int l)
+char *pastblock(char *line, char **pre, char **suf)
 {
+	char *prog = "pastblock";
 	char *p, *q, *r;
 	int i, j = 0, c = 0;
 
 	/* get the first occurence of **pre */
-	q = strstrblk(line, pre, l, &j);
-	fprintf(stderr, "strstrmaskblk: pre[%d] =  \"%s\", detected at \"%s\".\n", j, pre[j], q);
+	q = strstrblk(line, pre, &j);
+	fprintf(stderr, "%s: pre[%d] =  \"%s\", detected at \"%s\".\n", prog, j, pre[j], q);
 
 	/* check if parentheses are properly placed? - future project. */
 
@@ -369,29 +370,29 @@ char *pastblock(char *line, char **pre, char **suf, unsigned int l)
 					if (q < r) {
 						c++;
 						p = q + strlen(pre[j]);
-						fprintf(stderr, "strstrmaskblk: c=%d, p=\"%s\"\n", c, p);
+						fprintf(stderr, "%s: c=%d, p=\"%s\"\n", prog, c, p);
 					} else {
 						c--;
 						p = r + strlen(suf[j]);
-						fprintf(stderr, "strstrmaskblk: c=%d, p=\"%s\"\n", c, p);
+						fprintf(stderr, "%s: c=%d, p=\"%s\"\n", prog, c, p);
 					}
 				} else {
-					/* like y + z) */
-					/* shouldn't occur unless there were more pre[j] by a mistake? */
-					fprintf(stderr, "strstrmaskblk: error, there were more %s. no masking applied.\n", pre[j]);
-					return line;
+					/* like y + z) or y + z)) */
+					/* shouldn't occur unless there were more pre[j] by a mistake?? */
+					fprintf(stderr, "%s: error, there were more %s. there's a chance that the entire line is blocked. trying with shrkstr(line).\n", prog, pre[j]);
+					return pastblock(shrkstr(line), pre, suf);
 				}
 			} else {
-				fprintf(stderr, "strstrmaskblk: error, at least %d more %s than %s. no masking applied.\n", c, pre[j], suf[j]);
+				fprintf(stderr, "%s: error, at least %d more %s than %s. no masking applied.\n", prog, c, pre[j], suf[j]);
 				return line;
 			}
 		}
 		/* p should be pointing right after the first block ended, i.e., where the op parsing should start */
-		fprintf(stderr, "strstrmaskblk: line after block: \"%s\"\n", p);
+		fprintf(stderr, "%s: line after block: \"%s\"\n", prog, p);
 		return p;
 	} else {
 		/* pre[j] never occurred */
-		fprintf(stderr, "strstrmaskblk: no masking applied.\n");
+		fprintf(stderr, "%s: no masking applied.\n", prog);
 		return line;
 	}
 }
@@ -399,25 +400,21 @@ void testpastblock(void)
 {
 	char *line = "((x + y) + y) * (y + z)";
 	char *word = "y";
-	char *pre[] = { "(", "[", "{" };
-	char *suf[] = { ")", "]", "}" };
-	int i, l = sizeof(pre) / sizeof(pre[0]);
+	char *pre[] = { "(", "[", "{", NULL };
+	char *suf[] = { ")", "]", "}", NULL };
+	int i;
 
 	printf("line: \"%s\"\n", line);
-	for (i = 0; i < l; i++)
-		printf("pre: \"%s\", suf: \"%s\"\n", pre[i], suf[i]);
-	printf("testpastblock: \"%s\"\n", pastblock(line, pre, suf, l));
+	printf("testpastblock: \"%s\"\n", pastblock(line, pre, suf));
 }
 
 /* strstrmaskblk: bulk strstrmask applied to l delimeter sets */
-char *strstrmaskblk(char *line, char *word, char **pre, char **suf, unsigned int l)
+char *strstrmaskblk(char *line, char *word, char **pre, char **suf)
 {
-	/* the current code doesn't exactly does the job.
-	 * if word appears ahead of the masked block,
-	 * the current code doesn't catch that. */
+	/* ((x + y) + (y + z)) */
 	int j;
-	char *p = pastblock(line, pre, suf, l);
-	char *q = strstrblk(line, pre, l, &j);
+	char *p = pastblock(line, pre, suf);
+	char *q = strstrblk(line, pre, &j);
 	char *r = strstr(line, word);
 
 	if (q < r) {
@@ -430,22 +427,22 @@ void teststrstrmaskblk(void)
 {
 	char *line = "y * ((x + y) + y) * (y + z)";
 	char *word = "y";
-	char *pre[] = { "(", "[", "{" };
-	char *suf[] = { ")", "]", "}" };
-	int i, l = sizeof(pre) / sizeof(pre[0]);
+	char *pre[] = { "(", "[", "{", NULL };
+	char *suf[] = { ")", "]", "}", NULL };
+	int i;
 
 	printf("line: \"%s\"\n", line);
 	printf("word: \"%s\"\n", word);
 	printf("strstr: \"%s\"\n", strstr(line, word));
-	for (i = 0; i < l; i++)
-		printf("pre: \"%s\", suf: \"%s\"\n", pre[i], suf[i]);
-	printf("teststrstrmaskblk: \"%s\"\n", strstrmaskblk(line, word, pre, suf, l));
+	printf("teststrstrmaskblk: \"%s\"\n", strstrmaskblk(line, word, pre, suf));
 }
 
 /* strstrmask: mask part of the string with delimiters */
 char *strstrmask(char *line, char *word, char *pre, char *suf)
 {
-	return strstrmaskblk(line, word, &pre, &suf, 1);
+	char *pre2[] = { pre, NULL };
+	char *suf2[] = { suf, NULL };
+	return strstrmaskblk(line, word, pre2, suf2);
 }
 void teststrstrmask(void)
 {
@@ -458,7 +455,7 @@ void teststrstrmask(void)
 	printf("word: \"%s\"\n", word);
 	printf("strstr: \"%s\"\n", strstr(line, word));
 	printf("pre: \"%s\", suf: \"%s\"\n", pre, suf);
-	printf("strstrmask: \"%s\"\n", strstrmask(line, word, pre, suf));
+	printf("teststrstrmask: \"%s\"\n", strstrmask(line, word, pre, suf));
 }
 
 #endif	/* _GETWORD_H */

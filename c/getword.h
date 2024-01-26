@@ -64,14 +64,14 @@ char *strrstr(char *line, char *word);
 void teststrrstr(void);
 
 /* strstrblk: get the first occurence among words */
-char *strstrblk(char *line, char **words, unsigned int l, int *j);
+char *strstrblk(char *line, char **words, int *j);
 
 /* pastblock: a((bc)de)fg -> fg */
-char *pastblock(char *line, char **pre, char **suf, unsigned int l);
+char *pastblock(char *line, char **pre, char **suf);
 void testpastblock(void);
 
 /* strstrmaskblk: bulk strstrmask applied to l delimeter sets */
-char *strstrmaskblk(char *line, char *word, char **pre, char **suf, unsigned int l);
+char *strstrmaskblk(char *line, char *word, char **pre, char **suf);
 void teststrstrmaskblk(void);
 
 /* strstrmask: mask part of the string with delimiters */
