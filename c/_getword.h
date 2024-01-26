@@ -323,32 +323,40 @@ void teststrrstr(void)
 	printf("strrstr: \"%s\"\n", strrstr(line, word));
 }
 
+/* strstrblk: get the first occurence among words */
+char *strstrblk(char *line, char **words, unsigned int l, int *j)
+{
+	char *p, *q;
+	int i;
+
+	q = line + strlen(line);
+	
+	for (i = 0; i < l; i++)
+		if ((p = strstr(line, words[i])) != NULL)
+			if (p < q) {
+				fprintf(stderr, "strstrblk: word \"%s\" detected.\n", words[i]);
+				q = p;
+				*j = i;
+			}
+	fprintf(stderr, "strstrblk: words[%d] =  \"%s\", detected at \"%s\".\n", *j, words[*j], q);
+	return q;
+}
+
 /* pastblock: a((bc)de)fg -> fg */
 char *pastblock(char *line, char **pre, char **suf, unsigned int l)
 {
 	char *p, *q, *r;
 	int i, j = 0, c = 0;
 
-	q = line + strlen(line);
-
 	/* get the first occurence of **pre */
-	for (i = 0; i < l; i++)
-		if ((p = strstr(line, pre[i])) != NULL) {
-			if (p < q) {
-				fprintf(stderr, "strstrmaskblk: pre \"%s\" detected.\n", pre[i]);
-				q = p;
-				j = i;
-			}
-			if (c == 0)
-				c++;
-		}
+	q = strstrblk(line, pre, l, &j);
 	fprintf(stderr, "strstrmaskblk: pre[%d] =  \"%s\", detected at \"%s\".\n", j, pre[j], q);
 
 	/* check if parentheses are properly placed? - future project. */
 
 	/* count occurence of pre[j] and suf[j] */
 	if ((p = strstr(line, pre[j]) + strlen(pre[j])) != NULL) {
-		/* c = 1 already */
+		c = 1;
 		while (c > 0) {
 			q = strstr(p, pre[j]);
 			r = strstr(p, suf[j]);
@@ -407,11 +415,20 @@ char *strstrmaskblk(char *line, char *word, char **pre, char **suf, unsigned int
 	/* the current code doesn't exactly does the job.
 	 * if word appears ahead of the masked block,
 	 * the current code doesn't catch that. */
-	return strstr(pastblock(line, pre, suf, l), word)};
+	int j;
+	char *p = pastblock(line, pre, suf, l);
+	char *q = strstrblk(line, pre, l, &j);
+	char *r = strstr(line, word);
+
+	if (q < r) {
+		/* strstr(line, word) could be wrong, need to apply strstr to p */
+		return strstr(p, word);
+	}
+	return r;
 }
 void teststrstrmaskblk(void)
 {
-	char *line = "((x + y) + y) * (y + z)";
+	char *line = "y * ((x + y) + y) * (y + z)";
 	char *word = "y";
 	char *pre[] = { "(", "[", "{" };
 	char *suf[] = { ")", "]", "}" };
