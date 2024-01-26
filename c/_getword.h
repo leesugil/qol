@@ -481,7 +481,7 @@ char *pastblock(char *line, char **pre, char **suf)
 					/* like y + z) or y + z)) */
 					/* shouldn't occur unless there were more pre[j] by a mistake?? */
 					fprintf(stderr, "%s: error, there were more %s. there's a chance that the entire line is blocked. trying with shrkstr(line).\n", prog, pre[j]);
-					return pastblock(shrknstr(line, strlen(pre[j])), pre, suf);
+					return pastblock(bcutnstr(fcutnstr(line, strlen(pre[j])), strlen(suf[j])), pre, suf);
 				}
 			} else {
 				fprintf(stderr, "%s: error, at least %d more %s than %s. no masking applied.\n", prog, c, pre[j], suf[j]);
@@ -499,7 +499,7 @@ char *pastblock(char *line, char **pre, char **suf)
 }
 void testpastblock(void)
 {
-	char *line = "((x + y) + y) * (y + z)";
+	char *line = "(((x + y) + y) * (y + z))";
 	char *word = "y";
 	char *pre[] = { "(", "[", "{", NULL };
 	char *suf[] = { ")", "]", "}", NULL };
