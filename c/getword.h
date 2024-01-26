@@ -32,6 +32,20 @@ void testsgetwordg(char *s, int (*crit)(char ));
 /* ismathexpr: isalsnum + '.' + '-' */
 int ismathexpr(char c);
 
+/* fcutnstr: cuts off the first n characters */
+char *fcutnstr(char *s, unsigned int n);
+void testfcutnstr();
+
+/* fcutstr: fcutnstr( , 1) */
+char *fcutstr(char *s);
+
+/* bcutnstr: cuts of n characters from the back */
+char *bcutnstr(char *s, unsigned int n);
+void testbcutnstr(void);
+
+/* bcutstr: bcutnstr( , 1) */
+char *bcutstr(char *s);
+
 /* shrkstr: removes the first and last character of a string */
 char *shrkstr(char *);
 void testshrkstr(void);
@@ -40,9 +54,17 @@ void testshrkstr(void);
 char *shrknstr(char *s, unsigned int n);
 void testshrknstr(unsigned int n);
 
+/* fwrapstr: similar to strcat, but does dynamic allocation */
+char *fwrapstr(char *s, char *pre);
+void testfwrapstr(void);
+
+/* bwrapstr: similar to strcat, but does dynamic allocation */
+char *bwrapstr(char *s, char *suf);
+void testbwrapstr(void);
+
 /* wrapstr: places characters around a string */
-char *wrapstr(char *word, char *pre, char *suf);
-void testwrapstr(char *pre, char *suf);
+char *wrapstr(char *s, char *pre, char *suf);
+void testwrapstr(void);
 
 /* parenthstr: abc -> (abc) */
 char *parenthstr(char *word);

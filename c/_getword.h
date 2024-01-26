@@ -200,23 +200,68 @@ void testsgetwordg(char *s, int (*crit)(char ))
 		fprintf(stderr, "\"%s\"\n", word);
 }
 
+/* fcutnstr: cuts off the first n characters */
+char *fcutnstr(char *s, unsigned int n)
+{
+	if (s == NULL)
+		return NULL;
+
+	return (n < strlen(s)) ? s + n : NULL;
+}
+void testfcutnstr()
+{
+	char *line = "foo bar";
+	int n = 2;
+	
+	printf("line: \"%s\"\n", line);
+	printf("n: %d\n", n);
+	printf("testfcutnstr: \"%s\"\n", fcutnstr(line, n));
+}
+
+char *fcutstr(char *s)
+{
+	return fcutnstr(s, 1);
+}
+
+/* bcutnstr: cuts of n characters from the back */
+char *bcutnstr(char *s, unsigned int n)
+{
+	char *prog = "bcutnstr";
+	unsigned int m = strlen(s);
+
+	if (s == NULL || m <= n)
+		return NULL;
+
+	char t[m-n+1];
+	strncpy(t, s, m-n);
+	t[m-n] = '\0';
+
+	fprintf(stderr, "%s: strdup used in return, free required in use\n", prog);
+
+	return strdup(t);
+}
+void testbcutnstr(void)
+{
+	char *line = "foo bar";
+	int n = 2;
+	char *outcome;
+
+	printf("line: \"%s\"\n", line);
+	printf("n: %d\n", n);
+	printf("testbcutnstr: \"%s\"\n", outcome = bcutnstr(line, n));
+
+	free(outcome);
+}
+
+char *bcutstr(char *s)
+{
+	return bcutnstr(s, 1);
+}
+
 /* shrknstr: removes the first and last n characters of a string */
 char *shrknstr(char *s, unsigned int n)
 {
-	int l = strlen(s) - 2 * n + 1;
-	char output[l];
-	int i;
-
-	if (l > 0) {
-		for (i = n; i < strlen(s) - n; i++)
-			output[i-n] = s[i];
-		output[i-n] = '\0';
-		fprintf(stderr, "shrknstr: *** strdup used in the return, free it after use ***\n");
-		return strdup(output);
-	} else {
-		fprintf(stderr, "shrknstr: error, n too large\n");
-		return NULL;
-	}
+	return bcutnstr(fcutnstr(s, n), n);
 }
 void testshrknstr(unsigned n)
 {
@@ -235,23 +280,79 @@ void testshrkstr(void)
 	testshrknstr(1);
 }
 
-/* wrapstr: places characters around a string */
-char *wrapstr(char *word, char *pre, char *suf)
+/* fwrapstr: similar to strcat, but does dynamic allocation */
+char *fwrapstr(char *s, char *pre)
 {
-	unsigned int l = strlen(pre) + strlen(word) + strlen(suf) + 1;
-	char output[l];
-	int i, j = 0;
+	char *prog = "fwrapstr";
+	unsigned int n = strlen(pre) + strlen(s);
+	char output[n + 1];
+	output[0] = '\0';
 
-	sprintf(output, "%s%s%s", pre, word, suf);
+	strcat(output, pre);
+	strcat(output, s);
+	fprintf(stderr, "%s: strdup used, free required in use.\n", prog);
 
-	fprintf(stderr, "wrapword: *** strdup used in the return, free it after use ***\n");
 	return strdup(output);
 }
-void testwrapstr(char *pre, char *suf)
+void testfwrapstr(void)
 {
-	char *word = "test word";
-	printf("input: \"%s\"\n", word);
-	printf("output: \"%s\"\n", wrapstr(word, pre, suf));
+	char *s = "foo";
+	char *pre = "bar";
+	char *output;
+
+	printf("s: \"%s\"\n", s);
+	printf("pre: \"%s\"\n", pre);
+	printf("testfwrapstr: \"%s\"\n", output = fwrapstr(s, pre));
+
+	free(output);
+}
+
+/* bwrapstr: similar to strcat, but does dynamic allocation */
+char *bwrapstr(char *s, char *suf)
+{
+	char *prog = "bwrapstr";
+	unsigned int n = strlen(s) + strlen(suf);
+	char output[n + 1];
+	output[0] = '\0';
+
+	strcat(output, s);
+	strcat(output, suf);
+	fprintf(stderr, "%s: strdup used, free required in use.\n", prog);
+
+	return strdup(output);
+}
+void testbwrapstr(void)
+{
+	char *s = "foo";
+	char *suf = "bar";
+	char *output;
+
+	printf("s: \"%s\"\n", s);
+	printf("suf: \"%s\"\n", suf);
+	printf("testbwrapstr: \"%s\"\n", output = bwrapstr(s, suf));
+
+	free(output);
+}
+
+/* wrapstr: places characters around a string */
+char *wrapstr(char *s, char *pre, char *suf)
+{
+	char *prog = "wrapstr";
+	char *p = fwrapstr(s, pre);
+	char *q = bwrapstr(p, suf);
+
+	free(p);
+	fprintf(stderr, "%s: *** strdup used in the return, free it after use ***\n", prog);
+	return q;
+}
+void testwrapstr(void)
+{
+	char *s = "test word";
+	char *pre = "foo";
+	char *suf = "bar";
+
+	printf("input: \"%s\"\n", s);
+	printf("testwrapstr: \"%s\"\n", wrapstr(s, pre, suf));
 }
 
 /* parenthstr: abc -> (abc) */
