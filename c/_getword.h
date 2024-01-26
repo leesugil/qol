@@ -515,8 +515,11 @@ char *strstrmaskblk(char *line, char *word, char **pre, char **suf)
 	/* ((x + y) + (y + z)) */
 	char *prog = "strstrmaskblk";
 	int j;
+	fprintf(stderr, "%s: calling pastblock\n", prog);
 	char *p = pastblock(line, pre, suf);
+	fprintf(stderr, "%s: calling strstrblk\n", prog);
 	char *q = strstrblk(line, pre, &j);
+	fprintf(stderr, "%s: calling strstr\n", prog);
 	char *r = strstr(line, word);
 
 	if (q < r) {
@@ -525,6 +528,7 @@ char *strstrmaskblk(char *line, char *word, char **pre, char **suf)
 		return strstr(p, word);
 	}
 	fprintf(stderr, "%s: \"%s\" found early, masking not needed\n", prog, word);
+	/* this message shows up when " - " was not found */
 	return r;
 }
 void teststrstrmaskblk(void)
