@@ -323,13 +323,8 @@ void teststrrstr(void)
 	printf("strrstr: \"%s\"\n", strrstr(line, word));
 }
 
-/* strstrmaskblk: bulk strstrmask applied to l delimeter sets */
-	/* not for math formula. this one detects the first and the last
-	 * occurence of block parameters, fails to mask terms properly in
-	 * some cases such as
-	 * (x + y) * (y + z)
-	 * which the middle operator '*' shouldn't be masked in the math sense */
-char *strstrmaskblk(char *line, char *word, char **pre, char **suf, unsigned int l)
+/* pastblock: a((bc)de)fg -> fg */
+char *pastblock(char *line, char **pre, char **suf, unsigned int l)
 {
 	char *p, *q, *r;
 	int i, j = 0, c = 0;
@@ -376,23 +371,43 @@ char *strstrmaskblk(char *line, char *word, char **pre, char **suf, unsigned int
 					/* like y + z) */
 					/* shouldn't occur unless there were more pre[j] by a mistake? */
 					fprintf(stderr, "strstrmaskblk: error, there were more %s. no masking applied.\n", pre[j]);
-					return strstr(line, word);
+					return line;
 				}
 			} else {
 				fprintf(stderr, "strstrmaskblk: error, at least %d more %s than %s. no masking applied.\n", c, pre[j], suf[j]);
-				return strstr(line, word);
+				return line;
 			}
 		}
 		/* p should be pointing right after the first block ended, i.e., where the op parsing should start */
 		fprintf(stderr, "strstrmaskblk: line after block: \"%s\"\n", p);
-		p = strstr(p, word);
-		fprintf(stderr, "strstrmaskblk: returning \"%s\"\n", p);
 		return p;
 	} else {
 		/* pre[j] never occurred */
 		fprintf(stderr, "strstrmaskblk: no masking applied.\n");
-		return strstr(line, word);
+		return line;
 	}
+}
+void testpastblock(void)
+{
+	char *line = "((x + y) + y) * (y + z)";
+	char *word = "y";
+	char *pre[] = { "(", "[", "{" };
+	char *suf[] = { ")", "]", "}" };
+	int i, l = sizeof(pre) / sizeof(pre[0]);
+
+	printf("line: \"%s\"\n", line);
+	for (i = 0; i < l; i++)
+		printf("pre: \"%s\", suf: \"%s\"\n", pre[i], suf[i]);
+	printf("testpastblock: \"%s\"\n", pastblock(line, pre, suf, l));
+}
+
+/* strstrmaskblk: bulk strstrmask applied to l delimeter sets */
+char *strstrmaskblk(char *line, char *word, char **pre, char **suf, unsigned int l)
+{
+	/* the current code doesn't exactly does the job.
+	 * if word appears ahead of the masked block,
+	 * the current code doesn't catch that. */
+	return strstr(pastblock(line, pre, suf, l), word)};
 }
 void teststrstrmaskblk(void)
 {
