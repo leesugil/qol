@@ -6,98 +6,91 @@
 #include "_getword.h"
 
 /* getword: get next word or character from input */
-int getword(char *word, int lim);
-void testgetword();
-
-/* sgetword: get next word from string while reducing it */
-int sgetword(char **s, char *word, int lim);
+int getword(char *word, unsigned int lim);
+void testgetword(void);
+	
+/* sgetword: getword from string while moving pointer next to the word */
+int sgetword(char **s, char *word, unsigned int lim);
 void testsgetword(char *s);
 
 /* getalnum: get next word or character or number from input */
-int getalnum(char *word, int lim);
+int getalnum(char *word, unsigned int lim);
 void testgetalnum(void);
 
-/* sgetalnum: getalnum from string while reducing it */
-int sgetalnum(char **s, char *word, int lim);
+/* sgetalnum: getalnum from string while moving pointer next to the word */
+int sgetalnum(char **s, char *word, unsigned int lim);
 void testsgetalnum(char *s);
 
-/* getwordg: getword generalized, accepting an arbitrary criteria of acceptable characters in word */
-int getwordg(char *word, int lim, int (*crit)(char ));
+/* ismathword: in addition to alnum, '.' and '-' should be understood as part of a "word" as a mathematical quantity */
+int ismathword(char c);
+
+/* getwordg: getword generalized, accapting more criteria like crit=ismathword */
+int getwordg(char *word, unsigned int lim, int (*crit)(char ));
 void testgetwordg(int (*crit)(char ));
 
-/* sgetwordg: getwordg from string while reducing it */
-int sgetwordg(char **s, char *word, int lim, int (*crit)(char ));
+/* sgetwordg: getwordg from string while moving pointer next to the word */
+int sgetwordg(char **s, char *word, unsigned int lim, int (*crit)(char ));
 void testsgetwordg(char *s, int (*crit)(char ));
 
-/* ismathexpr: isalsnum + '.' + '-' */
-int ismathexpr(char c);
-
 /* fcutnstr: cuts off the first n characters */
-char *fcutnstr(char *s, unsigned int n);
-void testfcutnstr();
+void fcutnstr(char s[], unsigned int n);
+void testfcutnstr(int n);
 
 /* fcutstr: fcutnstr( , 1) */
-char *fcutstr(char *s);
+void fcutstr(char s[]);
 
 /* bcutnstr: cuts of n characters from the back */
-char *bcutnstr(char *s, unsigned int n);
-void testbcutnstr(void);
+void bcutnstr(char s[], unsigned int n);
+void testbcutnstr(int n);
 
 /* bcutstr: bcutnstr( , 1) */
-char *bcutstr(char *s);
+void bcutstr(char s[]);
 
-/* shrkstr: removes the first and last character of a string */
-char *shrkstr(char *);
+/* shrknstr: removes the first and last n characters of a string */
+void shrknstr(char s[], unsigned int n);
+void testshrknstr(int n);
+
+/* shrkstr: shrknstr( , 1) */
+void shrkstr(char s[]);
 void testshrkstr(void);
 
-/* shrknstr: removes the first and last n characters of a string. */
-char *shrknstr(char *s, unsigned int n);
-void testshrknstr(unsigned int n);
-
-/* fwrapstr: similar to strcat, but does dynamic allocation */
-char *fwrapstr(char *s, char *pre);
-void testfwrapstr(void);
-
-/* bwrapstr: similar to strcat, but does dynamic allocation */
-char *bwrapstr(char *s, char *suf);
-void testbwrapstr(void);
-
-/* wrapstr: places characters around a string */
-char *wrapstr(char *s, char *pre, char *suf);
+/* wrapstr: abc -> (p)abc(s) */
+void wrapstr(char s[], char *pre, char *suf);
 void testwrapstr(void);
 
 /* parenthstr: abc -> (abc) */
-char *parenthstr(char *word);
+void parenthstr(char s[]);
 void testparenthstr(void);
 
-/* brackstr: abd -> [abc] */
-char *brackstr(char *word);
+/* brackstr: abc -> [abc] */
+void brackstr(char s[]);
 void testbrackstr(void);
 
-/* bracestr: abd -> {abc} */
-char *bracestr(char *word);
+/* bracestr: abc -> {abc} */
+void bracestr(char s[]);
 void testbracestr(void);
 
-/* reverse: reverses a mutable string. for immutables, use with strdup. */
+/* reverse: reverses a mutable string. */
 void reverse(char s[]);
 
-/* strrstr: strstr reversed */
+/* strrstr: strstr reversed, searching the last occurence of the keyword */
 char *strrstr(char *line, char *word);
 void teststrrstr(void);
 
-/* strstrblk: get the first occurence among words */
-char *strstrblk(char *line, char **words, int *j);
+/* strstrblk: strstr against bulk search words such as { "search", "word1", "word2", NULL } and returning the first occurence of any of them */
+char *strstrblk(char *line, char **words, unsigned int *index);
+void teststrstrblk(void);
 
-/* pastblock: a((bc)de)fg -> fg */
-char *pastblock(char *line, char **pre, char **suf);
+/* pastblock: ([a{bc}(d)e]fg) -> fg */
+char *pastblock(char line[], char **pre, char **suf);
 void testpastblock(void);
 
-/* strstrmaskblk: bulk strstrmask applied to l delimeter sets */
-char *strstrmaskblk(char *line, char *word, char **pre, char **suf);
+/* strstrmaskblk: strstr, but masking blocks specified by bulk (multiple) block indicators such as pre={ "(", "{", "[", NULL } & suf={ ")", "}", "]", NULL } */
+char *strstrmaskblk(char line[], char *word, char **pre, char **suf);
 void teststrstrmaskblk(void);
 
-/* strstrmask: mask part of the string with delimiters */
-char *strstrmask(char *line, char *word, char *pre, char *suf);
+/* strstrmask: strstr with masking part of the string */
+char *strstrmask(char line[], char *word, char *pre, char *suf);
 void teststrstrmask(void);
 
 #endif	/* GETWORD_H */
