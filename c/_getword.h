@@ -282,8 +282,10 @@ void testshrkstr(void)
 void wrapstr(char s[], char *pre, char *suf)
 {
 	char *prog = "wrapstr";
+	char tmp[MAXCHAR] = "";
 
-	sprintf(s, "%s%s%s", pre, s, suf);
+	strcpy(tmp, s);
+	sprintf(s, "%s%s%s", pre, tmp, suf);
 }
 void testwrapstr(void)
 {
@@ -347,20 +349,21 @@ void reverse(char s[])
 /* strrstr: strstr reversed */
 char *strrstr(char *line, char *word)
 {
+	char *prog = "strrstr";
 	char dum_line[MAXCHAR] = "";
 	strcpy(dum_line, line);					/* 0123456789 */
 	reverse(dum_line);						/* 9876543210 */
 
 	char dum_word[MAXCHAR] = "";
 	strcpy(dum_word, word);					/* ......67.. */
-	reverse(word);							/* ..76...... */
+	reverse(dum_word);							/* ..76...... */
 
 	char *p = strstr(dum_line, dum_word);	/* ..76543210 */
 											/*   34     0 */
 	if (p != NULL) {
 		int n = (p - dum_line) + strlen(dum_word);
 		n = strlen(dum_line) - n;
-		return (0 < n && n < strlen(line) && strstr(line + n, word) != NULL) ? line + n : NULL;
+		return (0 <= n && n <= strlen(line) && strstr(line + n, word) != NULL) ? line + n : NULL;
 	}
 
 	return NULL;
@@ -392,14 +395,14 @@ char *strstrblk(char *line, char **words, unsigned int *index)
 void teststrstrblk(void)
 {
 	char *line = "abc 123 def 456 ghi 789";
-	char *words[] = { "def", "456", NULL };
+	char *words[] = { "456", "ghi", "def", NULL };
 	unsigned int i = 0;
 
 	printf("input: \"%s\"\n", line);
-	printf("words: {");
+	printf("words: { ");
 	for (int j = 0; words[j] != NULL; j++)
-		printf("\"%s\" ", words[j]);
-	printf("}\n");
+		printf("\"%s\", ", words[j]);
+	printf("\b\b }\n");
 	printf("index=%d\n", i);
 	printf("teststrstrblk: \"%s\", index=%u\n", strstrblk(line, words, &i), i);
 }
@@ -414,7 +417,7 @@ char *pastblock(char line[], char **pre, char **suf)
 
 	/* get the first occurence of **pre */
 	p = strstrblk(line, pre, &i);	/* returns NULL if not found */
-	fprintf(stderr, "%s: pre[%d] =  \"%s\", detected at \"%s\".\n", prog, i, pre[i], p);
+	fprintf(stderr, "%s: pre[%d]=\"%s\", detected at \"%s\".\n", prog, i, pre[i], p);								/* (((x + y) + z) * (y + z)) */
 
 	/* check if parentheses are properly placed? - future project.
 	 * part of it is implemented in the loop below. */
@@ -429,7 +432,7 @@ char *pastblock(char line[], char **pre, char **suf)
 		 * if c == 0, the first pre[i] is now closed, return.
 		 * go back to (1) */
 		c = 1;
-		p += strlen(pre[i]);
+		p += strlen(pre[i]);			/* ((x + y) + z) * (y + z)) */
 		while (c > 0) {
 			q = strstr(p, pre[i]);
 			r = strstr(p, suf[i]);
@@ -449,13 +452,17 @@ char *pastblock(char line[], char **pre, char **suf)
 					fprintf(stderr, "%s: error, there were more %s. there's a chance that the entire line is blocked. checking if it's the case...\n", prog, suf[i]);
 					/* check if the case is true. otherwise return NULL */
 					if (line == strstr(line, pre[i]) &&
-							line + strlen(line) - strlen(suf[i]) == strstr(line, suf[i])) {
-						fprintf(stderr, "%s: the case is true, removing the block indicators\n", prog);
+							line + strlen(line) - strlen(suf[i]) == strrstr(line, suf[i])) {
+						fprintf(stderr, "%s: => the case is true, removing the block indicators\n", prog);
 						fcutnstr(line, strlen(pre[i]));
 						bcutnstr(line, strlen(suf[i]));
 						return pastblock(line, pre, suf);
-					} else
+					} else {
+						fprintf(stderr, "%s: strstr(line, pre[i])=\"%s\"\n", prog, strstr(line, pre[i]));
+						fprintf(stderr, "%s: strrstr(line, suf[i])=\"%s\"\n", prog, strrstr(line, suf[i]));
+						fprintf(stderr, "%s: => it is not the case, please verify the input. returning NULL\n", prog);
 						return NULL;
+					}
 				}
 			} else {
 				if (r == NULL) {
@@ -467,21 +474,23 @@ char *pastblock(char line[], char **pre, char **suf)
 					/* q != NULL && r != NULL normal, keep updating c */
 					if (q < r) {
 						/* pre[i] detected first */
+						fprintf(stderr, "%s: c=%d, q=\"%s\"\n", prog, c, q);
 						c++;
 						p = q + strlen(pre[i]);
-						fprintf(stderr, "%s: c=%d, p=\"%s\"\n", prog, c, p);
+						fprintf(stderr, "%s: => c=%d, p=\"%s\"\n", prog, c, p);
 					} else {
 						/* suf[i] detected first */
+						fprintf(stderr, "%s: c=%d, r=\"%s\"\n", prog, c, r);
 						c--;
 						p = r + strlen(suf[i]);
-						fprintf(stderr, "%s: c=%d, p=\"%s\"\n", prog, c, p);
+						fprintf(stderr, "%s: => c=%d, p=\"%s\"\n", prog, c, p);
 					}
 				}
 			}
 		}
 		if (c == 0) {
 			/* code ran properly */
-			fprintf(stderr, "%s: result found:\n%s", p, line);
+			fprintf(stderr, "%s: result found:\n%s\n", prog, line);
 			for (int i = 0; i < p - line; i++)
 				fprintf(stderr, " ");
 			fprintf(stderr, "%s\n", p);
@@ -498,7 +507,7 @@ char *pastblock(char line[], char **pre, char **suf)
 }
 void testpastblock(void)
 {
-	char line[MAXCHAR] = "(((x + y) + y) * (y + z))";
+	char line[MAXCHAR] = "[[[x + y] + y] * [y + z]]";
 	char *word = "y";
 	char *pre[] = { "(", "[", "{", NULL };
 	char *suf[] = { ")", "]", "}", NULL };
