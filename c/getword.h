@@ -90,7 +90,7 @@ char *pastblock(char line[], char **pre, char **suf);
 void testpastblock(void);
 
 /* strstrmaskblk: strstr, but masking blocks specified by bulk (multiple) block indicators such as pre={ "(", "{", "[", NULL } & suf={ ")", "}", "]", NULL } */
-char *strstrmaskblk(char line[], char *word, char **pre, char **suf);
+char *strstrmaskblk(char line[], char *word, unsigned int *index, char **pre, char **suf);
 void teststrstrmaskblk(void);
 
 /* strstrmask: strstr with masking part of the string */

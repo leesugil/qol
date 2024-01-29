@@ -574,7 +574,7 @@ void testpastblock(void)
 }
 
 /* strstrmaskblk: strstr, but masking blocks specified by bulk (multiple) block indicators such as pre={ "(", "{", "[", NULL } & suf={ ")", "}", "]", NULL } */
-char *strstrmaskblk(char line[], char *word, char **pre, char **suf)
+char *strstrmaskblk(char line[], char *word, unsigned int *index, char **pre, char **suf)
 {
 	/* mission: make this function yield a pointer inside line (so that we can to pointer arithmetic with the outcome), and also, if possible, leave no dynamically allocated memories un-freed. */
 	/* mission accomplished. */
@@ -593,8 +593,7 @@ char *strstrmaskblk(char line[], char *word, char **pre, char **suf)
 	}
 
 	fprintf(stderr, "%s: potential keyword found, checking if there are blocks to be masked...\n", prog);
-	unsigned int index = 0;
-	char *q = strstrblk(line, pre, &index);
+	char *q = strstrblk(line, pre, index);
 	if (q != NULL)
 		if (q < r) {
 			/* block entry found ahead of the first primary operator */
@@ -618,12 +617,12 @@ void teststrstrmaskblk(void)
 	char *word = " + ";
 	char *pre[] = { "(", "[", "{", NULL };
 	char *suf[] = { ")", "]", "}", NULL };
-	int i;
+	unsigned int i = 0;
 
 	printf("line: \"%s\"\n", line);
 	printf("word: \"%s\"\n", word);
 	printf("strstr: \"%s\"\n", strstr(line, word));
-	printf("teststrstrmaskblk: \"%s\"\n", strstrmaskblk(line, word, pre, suf));
+	printf("teststrstrmaskblk: \"%s\"\n", strstrmaskblk(line, word, &i, pre, suf));
 }
 
 /* strstrmask: strstr with masking part of the string */
@@ -631,7 +630,9 @@ char *strstrmask(char line[], char *word, char *pre, char *suf)
 {
 	char *pre2[] = { pre, NULL };
 	char *suf2[] = { suf, NULL };
-	return strstrmaskblk(line, word, pre2, suf2);
+	unsigned int index = 0;
+
+	return strstrmaskblk(line, word, &index, pre2, suf2);
 }
 void teststrstrmask(void)
 {
