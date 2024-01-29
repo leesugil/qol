@@ -594,8 +594,13 @@ char *strstrmaskblk(char line[], char *word, char **pre, char **suf)
 			/* block entry found ahead of the first primary operator */
 			fprintf(stderr, "%s: block found before the search word, masking the block\n", prog);
 			char *p = pastblock(line, pre, suf);
-			fprintf(stderr, "%s: searching \"%s\" after the block as in \"%s\"\n", prog, word, p);
-			return strstr(p, word);
+			if (p != NULL) {
+				fprintf(stderr, "%s: searching \"%s\" after the block as in \"%s\"\n", prog, word, p);
+				return strstr(p, word);
+			} else {
+				fprintf(stderr, "%s: error, please revise the input string format.\n", prog);
+				return NULL;
+			}
 		}
 
 	fprintf(stderr, "%s: \"%s\" masking was not needed\n", prog, word);
