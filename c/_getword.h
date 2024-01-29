@@ -380,6 +380,7 @@ void teststrrstr(void)
 /* strstrblk: strstr against bulk search words such as { "search", "word1", "word2", NULL } and returning the first occurence of any of them */
 char *strstrblk(char *line, char **words, unsigned int *index)
 {
+	char *prog = "strstrblk";
 	char *p, *q = line + strlen(line);
 
 	for (int i = 0; words[i] != NULL; i++)
@@ -389,8 +390,13 @@ char *strstrblk(char *line, char **words, unsigned int *index)
 				q = p;
 				*index = i;
 			}
-	fprintf(stderr, "strstrblk: words[%d] =  \"%s\", detected at \"%s\".\n", *index, words[*index], q);
-	return q;
+	if (strcmp(q, "") != 0) {
+		fprintf(stderr, "%s: words[%d]=\"%s\", detected at \"%s\".\n", prog, *index, words[*index], q);
+		return q;
+	} else {
+		fprintf(stderr, "%s: words[%d]=\"%s\" not detectedm returning NULL\n", prog, *index, words[*index]);
+		return NULL;
+	}
 }
 void teststrstrblk(void)
 {
