@@ -201,7 +201,7 @@ void testsgetwordg(char *s, int (*crit)(char ))
 /* fcutnstr: cuts off the first n characters */
 void fcutnstr(char s[], unsigned int n)
 {
-	if (s != NULL && n < strlen(s)) {
+	if (s != NULL && n <= strlen(s)) {
 		/*s += n;*/
 		int i;
 
@@ -231,7 +231,7 @@ void bcutnstr(char s[], unsigned int n)
 	char *prog = "bcutnstr";
 	unsigned int m = strlen(s);
 
-	if (s == NULL || m <= n)
+	if (s == NULL || m < n)
 		;
 	else
 		s[m - n] = '\0';
@@ -929,14 +929,19 @@ char *strstrblkmaskblk(char line[], char **bulk_words, unsigned int *index, char
 void teststrstrblkmaskblk(void)
 {
 	char *prog = "teststrstrblkmaskblk";
-	char line[MAXCHAR] = "([(x + y) + z] * {x + (y + z)})";
-	char *words[] = {
+	//char line[MAXCHAR] = "([(x + y) + z] * {x + (y + z)})";
+	/*char *words[] = {
 		" + ",
 		" - ",
 		" * ",
 		" / ",
 		" % ",
 		"^",
+		NULL
+	};*/
+	char line[MAXCHAR] = " = ";
+	char *words[] = {
+		" = ",
 		NULL
 	};
 	char *pre[] = {
@@ -954,7 +959,8 @@ void teststrstrblkmaskblk(void)
 	unsigned int index = 0;
 
 	printf("input: %s\n", line);
-	printf("%s: %s\n", prog, strstrblkmaskblk(line, words, &index, pre, suf));
+	//printf("%s: %s\n", prog, strstrblkmaskblk(line, words, &index, pre, suf));
+	printf("%s: %s\n", prog, strstrblkmaskblk(line, words, &index, NULL, NULL));
 }
 
 /* printn: print a string n times */
