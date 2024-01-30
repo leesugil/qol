@@ -383,6 +383,11 @@ char *strstrblk(char *line, char **words, unsigned int *index)
 	char *prog = "strstrblk";
 	char *p, *q = line + strlen(line);
 
+	if (line == NULL || words == NULL) {
+		fprintf(stderr, "%s: NULL condition(s)\n", prog);
+		return NULL;
+	}
+
 	for (int i = 0; words[i] != NULL; i++)
 		if ((p = strstr(line, words[i])) != NULL)
 			if (p < q) {
@@ -466,6 +471,11 @@ char *pastblock(char line[], char **pre, char **suf)
 	char *p, *q, *r;
 	unsigned int i = 0;
 	int c = 0, is_first_block = 0;
+
+	if (line == NULL || pre == NULL || suf == NULL) {
+		fprintf(stderr, "%s: NULL conditions, returning original line\n", prog);
+		return line;
+	}
 
 	/* get the first occurence of **pre */
 	p = strstrblk(line, pre, &i);	/* returns NULL if not found */
@@ -592,6 +602,7 @@ void testpastblock(void)
 /* strstrmaskblk: strstr, but masking blocks specified by bulk (multiple) block indicators such as pre={ "(", "{", "[", NULL } & suf={ ")", "}", "]", NULL } */
 char *strstrmaskblk(char line[], char *word, unsigned int *index, char **pre, char **suf)
 {
+	/* how does it handle NULL, NULL for pre, suf? */
 	/* mission: make this function yield a pointer inside line (so that we can to pointer arithmetic with the outcome), and also, if possible, leave no dynamically allocated memories un-freed. */
 	/* mission accomplished. */
 	/* ((x + y) + (y + z)) */
@@ -609,6 +620,10 @@ char *strstrmaskblk(char line[], char *word, unsigned int *index, char **pre, ch
 	}
 
 	fprintf(stderr, "%s: potential keyword found, checking if there are blocks to be masked...\n", prog);
+	if (pre != NULL) {
+		for (int k=0; pre[k] != NULL; k++)
+			printf("%s\n", pre[k]);
+	}
 	char *q = strstrblk(line, pre, index);
 	if (q != NULL)
 		if (q < r) {
@@ -669,12 +684,15 @@ void teststrstrmask(void)
 }
 
 /* strstrblkmaskblk: strstr with bulk search words, with respect to bulk masking words */
+/* index return is for bulk_words */
 char *strstrblkmaskblk(char line[], char **bulk_words, unsigned int *index, char **pre, char **suf)
 {
 	char *prog = "strstrblkmaskblk";
 	char *p, *q = NULL;
+	unsigned int dummy_index = 0;
+
 	for (int i = 0; bulk_words[i] != NULL; i++) {
-		p = strstrmaskblk(line, bulk_words[i], index, pre, suf);
+		p = strstrmaskblk(line, bulk_words[i], &dummy_index, pre, suf);
 		if (q == NULL || (p != NULL && p < q)) {
 			q = p;
 			*index = i;
