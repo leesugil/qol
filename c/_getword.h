@@ -425,6 +425,7 @@ int countstrstr(char *line, char *word)
 	int n = 0;
 	char *p = line;
 	
+	fprintf(stderr, "%s: n:%d, word=%s, p=%s\n", prog, n, word, p);
 	while ((p = strstr(p, word)) != NULL) {
 		fprintf(stderr, "%s: n:%d, word=%s, p=%s\n", prog, n, word, p);
 		p += strlen(word);
@@ -509,34 +510,76 @@ int is_outer_blocked(char *line, char *pre, char *suf)
 	if (line != NULL && pre != NULL && suf != NULL)
 		if (is_blocked_properly(line, pre, suf)) {
 			char *p = strstr(line, pre);
-			if (strcmp(line, p) == 0)
-				while ((p = strstr(p, pre)) != NULL) {
-					/* (x + y) */
-					/* (x + y)) */
-					/* (x + y)) + z */
-					/* (x + y) + (y + z) */
-					p += strlen(pre);
-					/* x + y) */
-					/* x + y)) */
-					/* x + y)) + z */
-					/* x + y) + (y + z) */
-					fprintf(stderr, "%s\n", p);
-					if (countstrstr(p, pre) == 0 && countstrstr(p, suf) > 0) {
-						if (strcmp(strrstr(p, suf) + strlen(suf), "") == 0)
-							return 1;
+			char *q = strrstr(line, suf);
+			char *r = NULL;
+			if (strcmp(line, p) == 0 && strcmp("", q + strlen(suf)) == 0) {
+				/* line starting and ending with pre, suf, respectively */
+				/* (x + (x + y) * z) */
+				/* (x + y) * (y + z) */
+				/* c = 0 at some point
+				 * ==> no outer block */
+				/* boundaries, c > 0, and, at some point, countstrstr(p, pre) == 0 and countstrstr(p, suf) == 1
+				 * ==> outer block */
+				int c = 0, entry = 1;
+				while (c > 0 || entry == 1) {
+					entry = 0;
+					fprintf(stderr, "%s: p=\"%s\"\n", prog, p);
+					q = strstr(p, pre);
+					r = strstr(p, suf);
+					if (q != NULL && r != NULL) {
+						if (q < r) {
+							p = q + strlen(pre);
+							c++;
+						} else {
+							p = r + strlen(suf);
+							c--;
+						}
+					}
+					if (q != NULL && r == NULL) {
+						/* impossible */
+						p = q + strlen(pre);
+						c++;
+					}
+					if (q == NULL && r != NULL) {
+						/* shouldn't this be the end? */
+						//p = r + strlen(suf);
+						//c--;
+						return 1;
+					}
+					if (q == NULL && r == NULL) {
+						return 0;
 					}
 				}
+			}
 		}
 
 	return 0;
 }
 void testis_outer_blocked(void)
 {
-	char *line = "(is this outer-blocked?)";
+	char *line = "(x + y) * (y + z)";
 	char *pre = "(";
 	char *suf = ")";
 
 	printf("input: %s\n", line);
+	printf("pre: %s\n", pre);
+	printf("suf: %s\n", suf);
+	printf("testis_outer_blocked: %d\n", is_outer_blocked(line, pre, suf));
+
+	line = "(x * (x + y) * z)";
+	printf("\ninput: %s\n", line);
+	printf("pre: %s\n", pre);
+	printf("suf: %s\n", suf);
+	printf("testis_outer_blocked: %d\n", is_outer_blocked(line, pre, suf));
+
+	line = "((x + y) * z)";
+	printf("\ninput: %s\n", line);
+	printf("pre: %s\n", pre);
+	printf("suf: %s\n", suf);
+	printf("testis_outer_blocked: %d\n", is_outer_blocked(line, pre, suf));
+
+	line = "(x * (x + y))";
+	printf("\ninput: %s\n", line);
 	printf("pre: %s\n", pre);
 	printf("suf: %s\n", suf);
 	printf("testis_outer_blocked: %d\n", is_outer_blocked(line, pre, suf));
