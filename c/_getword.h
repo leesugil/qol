@@ -506,10 +506,10 @@ int is_outer_blocked(char *line, char *pre, char *suf)
 {
 	char *prog = "is_outer_blocked";
 
-	if (line != NULL && pre != NULL && suf != NULL) {
+	if (line != NULL && pre != NULL && suf != NULL)
 		if (is_blocked_properly(line, pre, suf)) {
 			char *p = strstr(line, pre);
-			if (strcmp(line, p) == 0) {
+			if (strcmp(line, p) == 0)
 				while ((p = strstr(p, pre)) != NULL) {
 					/* (x + y) */
 					/* (x + y)) */
@@ -526,9 +526,7 @@ int is_outer_blocked(char *line, char *pre, char *suf)
 							return 1;
 					}
 				}
-			}
 		}
-	}
 
 	return 0;
 }
@@ -542,6 +540,46 @@ void testis_outer_blocked(void)
 	printf("pre: %s\n", pre);
 	printf("suf: %s\n", suf);
 	printf("testis_outer_blocked: %d\n", is_outer_blocked(line, pre, suf));
+}
+
+/* is_outer_blocked_blk */
+int is_outer_blocked_blk(char *line, char **pre, char **suf, unsigned int *index)
+{
+	if (line == NULL || pre == NULL || suf == NULL)
+		return 0;
+
+	*index = 0;
+	
+	char *p = NULL;
+	int i, output = 0;
+
+	for (i = 0; pre[i] != NULL || suf[i] != NULL; i++)
+		if (is_outer_blocked(line, pre[i], suf[i]) == 1) {
+			*index = i;
+			return 1;
+		}
+
+	return 0;
+}
+void testis_outer_blocked_blk(void)
+{
+	char *line = "[is this line outer-blocked?]";
+	char *pre[] = {
+		"(",
+		"[",
+		"{",
+		NULL
+	};
+	char *suf[] = {
+		")",
+		"]",
+		"}",
+		NULL
+	};
+	unsigned int index = 0;
+
+	printf("input:\"%s\"\n", line);
+	printf("testis_outer_blocked_blk:%d\n", is_outer_blocked_blk(line, pre, suf, &index));
 }
 
 /* remove_outer_block_blk */
