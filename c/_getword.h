@@ -520,7 +520,7 @@ int is_outer_blocked(char *line, char *pre, char *suf)
 					/* x + y)) */
 					/* x + y)) + z */
 					/* x + y) + (y + z) */
-					printf("%s\n", p);
+					fprintf(stderr, "%s\n", p);
 					if (countstrstr(p, pre) == 0 && countstrstr(p, suf) > 0) {
 						if (strcmp(strrstr(p, suf) + strlen(suf), "") == 0)
 							return 1;
@@ -807,7 +807,7 @@ char *strstrmaskblk(char line[], char *word, unsigned int *index, char **pre, ch
 	fprintf(stderr, "%s: potential keyword found, checking if there are blocks to be masked...\n", prog);
 	if (pre != NULL) {
 		for (int k=0; pre[k] != NULL; k++)
-			printf("%s\n", pre[k]);
+			fprintf(stderr, "%s\n", pre[k]);
 	}
 	char *q = strstrblk(line, pre, index);
 	if (q != NULL)
