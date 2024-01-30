@@ -73,6 +73,8 @@ void removeNode(Node *p)
 	if (p != NULL) {
 		removeNode(p->left);
 		removeNode(p->right);
+		p->left = NULL;
+		p->right = NULL;
 		/* free all dynamically allocated members */
 		free(p->name);
 		free(p);
