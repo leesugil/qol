@@ -419,31 +419,75 @@ void teststrstrblk(void)
 }
 
 /* countstrstr: counts number of times the search word occuring inside str */
-int countstrstr(char line[], char *word)
+int countstrstr(char *line, char *word)
 {
 	char *prog = "countstrstr";
 	int n = 0;
 	char *p = line;
 	
-	while (strstr(p, word) != NULL) {
-		fprintf(stderr, "%s: n:%d, word=%s, p=%s\n", prog, n, word, strstr(p, word));
-		p = strstr(p, word) + strlen(word);
+	while ((p = strstr(p, word)) != NULL) {
+		fprintf(stderr, "%s: n:%d, word=%s, p=%s\n", prog, n, word, p);
+		p += strlen(word);
 		n++;
-		fprintf(stderr, "%s: => n:%d, word=%s, p=%s\n", prog, n, word, strstr(p, word));
+		fprintf(stderr, "%s: => n:%d, word=%s, p=%s\n", prog, n, word, p);
 	}
 
 	return n;
 }
-
-/* blockedproperly: check if any blocks (such as "(" & ")", "[" & "]", or "{" & "}") are placed propely. */
-/* the current version only checks if there are same number of block-starts and block-ends */
-int blockedproperly(char line[], char *pre, char *suf)
+void testcountstrstr(void)
 {
-	int n = countstrstr(line, pre) - countstrstr(line, suf);
+	char *line = "((x + y) * z)";
+	char *word = "(";
 
-	return (n == 0) ? 1 : 0;
+	printf("input:%s\n", line);
+	printf("word:%s\n", word);
+	printf("testcountstrstr:%d\n", countstrstr(line, word));
 }
-void testblockedproperly(void)
+
+/* is_blocked_properly: check if any blocks (such as "(" & ")", "[" & "]", or "{" & "}") are placed propely. */
+/* the current version only checks if there are same number of block-starts and block-ends */
+int is_blocked_properly(char line[], char *pre, char *suf)
+{
+	char *prog = "is_blocked_properly";
+	char *p = strstr(line, pre);
+
+	if (p != NULL) {
+		int c = 0;
+		char *q = NULL, *r = NULL;
+
+		while (p != NULL && c >= 0) {
+			q = strstr(p, pre);
+			r = strstr(p, suf);
+			fprintf(stderr, "%s: p=\"%s\"\n", prog, p);
+			if (q != NULL && r != NULL) {
+				if (q < r) {
+					/* pre appears first */
+					p = q + strlen(pre);
+					c++;
+				} else {
+					/* suf appears first */
+					p = r + strlen(suf);
+					c--;
+				}
+			} else if (q == NULL && r != NULL) {
+				/* pre depleted */
+				p = r + strlen(suf);
+				c--;
+			} else if (q != NULL && r == NULL) {
+				/* suf depleted only, shouldn't happen */
+				p = q + strlen(pre);
+				c++;
+			} else
+				p = NULL;
+		}
+
+		if (c == 0)
+			return 1;
+	}
+
+	return 0;
+}
+void testis_blocked_properly(void)
 {
 	char line1[MAXCHAR] = "((foo)-(bar))";
 	char line2[MAXCHAR] = "(((foo)-(bar))";
@@ -451,10 +495,90 @@ void testblockedproperly(void)
 	char *suf = ")";
 
 	printf("input: %s\n", line1);
-	printf("testblockedproperly: %d\n", blockedproperly(line1, pre, suf));
+	printf("testis_blocked_properly: %d\n", is_blocked_properly(line1, pre, suf));
 
 	printf("input: %s\n", line2);
-	printf("testblockedproperly: %d\n", blockedproperly(line2, pre, suf));
+	printf("testis_blocked_properly: %d\n", is_blocked_properly(line2, pre, suf));
+}
+
+/* is_outer_blocked: 1 if the redundant outer-most block is detected */
+int is_outer_blocked(char *line, char *pre, char *suf)
+{
+	char *prog = "is_outer_blocked";
+
+	if (line != NULL && pre != NULL && suf != NULL) {
+		if (is_blocked_properly(line, pre, suf)) {
+			char *p = strstr(line, pre);
+			if (strcmp(line, p) == 0) {
+				while ((p = strstr(p, pre)) != NULL) {
+					/* (x + y) */
+					/* (x + y)) */
+					/* (x + y)) + z */
+					/* (x + y) + (y + z) */
+					p += strlen(pre);
+					/* x + y) */
+					/* x + y)) */
+					/* x + y)) + z */
+					/* x + y) + (y + z) */
+					printf("%s\n", p);
+					if (countstrstr(p, pre) == 0 && countstrstr(p, suf) > 0) {
+						if (strcmp(strrstr(p, suf) + strlen(suf), "") == 0)
+							return 1;
+					}
+				}
+			}
+		}
+	}
+
+	return 0;
+}
+void testis_outer_blocked(void)
+{
+	char *line = "(is this outer-blocked?)";
+	char *pre = "(";
+	char *suf = ")";
+
+	printf("input: %s\n", line);
+	printf("pre: %s\n", pre);
+	printf("suf: %s\n", suf);
+	printf("testis_outer_blocked: %d\n", is_outer_blocked(line, pre, suf));
+}
+
+/* remove_outer_block_blk */
+void remove_outer_block_blk(char line[], char **pre, char **suf)
+{
+	if (line != NULL && pre != NULL && suf != NULL) {
+		/* obtain the left-most block opening */
+		char *p = NULL;
+		unsigned int index = 0;
+
+		p = strstrblk(line, pre, &index);
+
+		/* test is_blocked_proply */
+		if (is_blocked_properly(line, pre[index], suf[index]))
+			/* test if outer block exists */
+			if (is_outer_blocked(line, pre[index], suf[index])) {
+				/* fcutnstr, bcutnstr */
+				fcutnstr(line, strlen(pre[index]));
+				bcutnstr(line, strlen(suf[index]));
+			}
+	}
+}
+void testremove_outer_block_blk(void)
+{
+	char line[MAXCHAR] = "<!--get rid of this comment!-->";
+	char *pre[] = {
+		"<!--",
+		NULL
+	};
+	char *suf[] = {
+		"-->",
+		NULL
+	};
+
+	printf("input: \"%s\"\n", line);
+	remove_outer_block_blk(line, pre, suf);
+	printf("testremove_outer_block_blk: \"%s\"\n", line);
 }
 
 /* pastblock: ([a{bc}(d)e]fg) -> fg */
@@ -483,7 +607,7 @@ char *pastblock(char line[], char **pre, char **suf)
 
 	/* check if parentheses are properly placed. */
 	/* check if it's not the " % (y + z" case. */
-	if (blockedproperly(line, pre[i], suf[i])) {
+	if (is_blocked_properly(line, pre[i], suf[i])) {
 		fprintf(stderr, "%s: blocked properly.\n", prog);
 		/* count occurence of pre[i] and suf[i] */
 		if (p != NULL) {
@@ -583,7 +707,7 @@ char *pastblock(char line[], char **pre, char **suf)
 			return line;
 		}
 	} else {
-		/* blockedproperly == 0, fail. */
+		/* is_blocked_properly == 0, fail. */
 		fprintf(stderr, "%s: %s and %s were not placed properly, returning NULL\n", prog, pre[i], suf[i]);
 		return NULL;
 	}
@@ -602,7 +726,6 @@ void testpastblock(void)
 /* strstrmaskblk: strstr, but masking blocks specified by bulk (multiple) block indicators such as pre={ "(", "{", "[", NULL } & suf={ ")", "}", "]", NULL } */
 char *strstrmaskblk(char line[], char *word, unsigned int *index, char **pre, char **suf)
 {
-	/* how does it handle NULL, NULL for pre, suf? */
 	/* mission: make this function yield a pointer inside line (so that we can to pointer arithmetic with the outcome), and also, if possible, leave no dynamically allocated memories un-freed. */
 	/* mission accomplished. */
 	/* ((x + y) + (y + z)) */
@@ -632,10 +755,6 @@ char *strstrmaskblk(char line[], char *word, unsigned int *index, char **pre, ch
 			char *p = pastblock(line, pre, suf);
 			if (p != NULL) {
 				fprintf(stderr, "%s: searching \"%s\" after the block as in \"%s\"\n", prog, word, p);
-				/* happy untill p=" * (kword + y)"
-				 * yielding "kword + y)" */
-				/* imperfect as a stand-alone function but
-				 * okay in the math context as the " * " part will always be the case */
 				return strstrmaskblk(p, word, index, pre, suf);
 			} else {
 				fprintf(stderr, "%s: error, please revise the input string format.\n", prog);
@@ -739,5 +858,7 @@ void printn(char *s, int n)
 	for (int i = 0; i < n; i++)
 		printf("%s", s);
 }
+
+
 
 #endif	/* _GETWORD_H */

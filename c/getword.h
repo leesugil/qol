@@ -81,9 +81,9 @@ void teststrrstr(void);
 char *strstrblk(char *line, char **words, unsigned int *index);
 void teststrstrblk(void);
 
-/* blockedproperly */
-int blockedproperly(char line[], char *pre, char *suf);
-void testblockedproperly(void);
+/* is_blocked_properly */
+int is_blocked_properly(char line[], char *pre, char *suf);
+void testis_blocked_properly(void);
 
 /* pastblock: ([a{bc}(d)e]fg) -> fg */
 char *pastblock(char line[], char **pre, char **suf);
