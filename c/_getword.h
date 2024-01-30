@@ -619,6 +619,30 @@ void testremove_outer_block_blk(void)
 	printf("testremove_outer_block_blk: \"%s\"\n", line);
 }
 
+/* remove_outer_block */
+void remove_outer_block(char line[], char *pre, char *suf)
+{
+	char *pre2[] = {
+		pre,
+		NULL
+	};
+	char *suf2[] = {
+		suf,
+		NULL
+	};
+	remove_outer_block_blk(line, pre2, suf2);
+}
+void testremove_outer_block(void)
+{
+	char line[MAXCHAR] = "<!--get rid of this comment!-->";
+	char *pre = "<!--";
+	char *suf = "-->";
+
+	printf("input: \"%s\"\n", line);
+	remove_outer_block(line, pre, suf);
+	printf("testremove_outer_block: \"%s\"\n", line);
+}
+
 /* pastblock: ([a{bc}(d)e]fg) -> fg */
 /* error-case found:
  * pastblock: c=1, r=") % (y + z"
