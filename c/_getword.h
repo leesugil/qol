@@ -447,6 +447,8 @@ void testcountstrstr(void)
 
 /* is_blocked_properly: check if any blocks (such as "(" & ")", "[" & "]", or "{" & "}") are placed propely. */
 /* the current version only checks if there are same number of block-starts and block-ends */
+// examples like )x+y( or [(x]+y would pass
+// returns TRUE if no blocks are detected as well
 int is_blocked_properly(char line[], char *pre, char *suf)
 {
 	char *prog = "is_blocked_properly";
@@ -484,13 +486,17 @@ int is_blocked_properly(char line[], char *pre, char *suf)
 
 		if (c == 0)
 			return 1;
+	} else if (strstr(line, suf) == NULL) {
+		// no blocks detected, clean.
+		return 1;
 	}
 
 	return 0;
 }
 void testis_blocked_properly(void)
 {
-	char line1[MAXCHAR] = "((foo)-(bar))";
+	char line1[MAXCHAR] = "([(foo)-(]bar))";
+	// the function would not detect such false case yet - future project
 	char line2[MAXCHAR] = "(((foo)-(bar))";
 	char *pre = "(";
 	char *suf = ")";
@@ -500,6 +506,59 @@ void testis_blocked_properly(void)
 
 	printf("input: %s\n", line2);
 	printf("testis_blocked_properly: %d\n", is_blocked_properly(line2, pre, suf));
+}
+
+/* is_blocked_properly_blk */
+int is_blocked_properly_blk(char *line, char **pre, char **suf, int *index)
+{
+	char *prog = "is_blocked_properly_blk";
+
+	if (line == NULL || pre == NULL || suf == NULL)
+		return 0;
+
+	*index = -1;
+	
+	char *p = NULL;
+	int i, output = 1;
+
+	// the test condition should be "for all"
+	for (i = 0; pre[i] != NULL || suf[i] != NULL; i++) {
+		output *= is_blocked_properly(line, pre[i], suf[i]);
+		if (output == 0) {
+			// failed
+			fprintf(stdout, "%s: \"%s\" \"%s\" \"%s\" failed\n", prog, pre[i], suf[i], line);
+			*index = i;
+			return 0;
+		}
+	}
+
+	return 1;
+}
+void testis_blocked_properly_blk(void)
+{
+	char *line = "is (this line [properly blocked)?]";
+	// this will not be captured in the current version of the function yet
+	line = "(is this line properly blocked?)";
+	char *pre[] = {
+		"(",
+		"[",
+		"{",
+		NULL
+	};
+	char *suf[] = {
+		")",
+		"]",
+		"}",
+		NULL
+	};
+	int index = 0;
+
+	printf("input:\"%s\"\n", line);
+	printf("testis_blocked_properly_blk:%d\n", is_blocked_properly_blk(line, pre, suf, &index));
+
+	line = "is (this line [properly blocked]?";
+	printf("input:\"%s\"\n", line);
+	printf("testis_blocked_properly_blk:%d\n", is_blocked_properly_blk(line, pre, suf, &index));
 }
 
 /* is_outer_blocked: 1 if the redundant outer-most block is detected */
@@ -586,21 +645,24 @@ void testis_outer_blocked(void)
 }
 
 /* is_outer_blocked_blk */
-int is_outer_blocked_blk(char *line, char **pre, char **suf, unsigned int *index)
+int is_outer_blocked_blk(char *line, char **pre, char **suf, int *index)
 {
 	if (line == NULL || pre == NULL || suf == NULL)
 		return 0;
 
-	*index = 0;
+	*index = -1;
 	
 	char *p = NULL;
 	int i, output = 0;
 
-	for (i = 0; pre[i] != NULL || suf[i] != NULL; i++)
-		if (is_outer_blocked(line, pre[i], suf[i]) == 1) {
+	// test "there exists"
+	for (i = 0; pre[i] != NULL || suf[i] != NULL; i++) {
+		output += is_outer_blocked(line, pre[i], suf[i]);
+		if (output == 1) {
 			*index = i;
 			return 1;
 		}
+	}
 
 	return 0;
 }
@@ -619,7 +681,7 @@ void testis_outer_blocked_blk(void)
 		"}",
 		NULL
 	};
-	unsigned int index = 0;
+	int index = 0;
 
 	printf("input:\"%s\"\n", line);
 	printf("testis_outer_blocked_blk:%d\n", is_outer_blocked_blk(line, pre, suf, &index));
