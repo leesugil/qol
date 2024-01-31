@@ -452,6 +452,9 @@ void testcountstrstr(void)
 int is_blocked_properly(char line[], char *pre, char *suf)
 {
 	char *prog = "is_blocked_properly";
+
+	fprintf(stderr, "%s: (start) \"%s\" \"%s\" \"%s\"\n", prog, pre, suf, line);
+
 	char *p = strstr(line, pre);
 
 	if (p != NULL) {
@@ -484,13 +487,17 @@ int is_blocked_properly(char line[], char *pre, char *suf)
 				p = NULL;
 		}
 
-		if (c == 0)
+		if (c == 0) {
+			fprintf(stderr, "%s: pass\n", prog);
 			return 1;
+		}
 	} else if (strstr(line, suf) == NULL) {
 		// no blocks detected, clean.
+		fprintf(stderr, "%s: pass\n", prog);
 		return 1;
 	}
 
+	fprintf(stderr, "%s: fail\n", prog);
 	return 0;
 }
 void testis_blocked_properly(void)
@@ -566,11 +573,18 @@ int is_outer_blocked(char *line, char *pre, char *suf)
 {
 	char *prog = "is_outer_blocked";
 
-	if (line != NULL && pre != NULL && suf != NULL)
+	fprintf(stderr, "%s: (start) \"%s\" \"%s\" \"%s\"\n", prog, pre, suf, line);
+
+	if (line != NULL && pre != NULL && suf != NULL) {
+		fprintf(stderr, "%s: checking if blocked properly\n", prog);
 		if (is_blocked_properly(line, pre, suf)) {
+			fprintf(stderr, "%s: (pass) checking if blocked properly\n", prog);
+			// "[" "]" "2 * ((5 + 6) * z)"
 			char *p = strstr(line, pre);
 			char *q = strrstr(line, suf);
 			char *r = NULL;
+			if (p == NULL || q == NULL)
+				return 0;
 			if (strcmp(line, p) == 0 && strcmp("", q + strlen(suf)) == 0) {
 				/* line starting and ending with pre, suf, respectively */
 				/* (x + (x + y) * z) */
@@ -603,15 +617,20 @@ int is_outer_blocked(char *line, char *pre, char *suf)
 						/* shouldn't this be the end? */
 						//p = r + strlen(suf);
 						//c--;
+						fprintf(stderr, "%s: pass\n", prog);
 						return 1;
 					}
 					if (q == NULL && r == NULL) {
+						fprintf(stderr, "%s: fail\n", prog);
 						return 0;
 					}
 				}
 			}
-		}
+		} else
+			fprintf(stderr, "%s: (fail) checking if blocked properly\n", prog);
+	}
 
+	fprintf(stderr, "%s: fail\n", prog);
 	return 0;
 }
 void testis_outer_blocked(void)
@@ -690,6 +709,10 @@ void testis_outer_blocked_blk(void)
 /* remove_outer_block_blk */
 void remove_outer_block_blk(char line[], char **pre, char **suf)
 {
+	char *prog = "remove_outer_block_blk";
+
+	fprintf(stderr, "%s: (start) \"%s\"\n", prog, line);
+	
 	if (line != NULL && pre != NULL && suf != NULL) {
 		/* obtain the left-most block opening */
 		char *p = NULL;
@@ -697,15 +720,25 @@ void remove_outer_block_blk(char line[], char **pre, char **suf)
 
 		p = strstrblk(line, pre, &index);
 
-		/* test is_blocked_proply */
-		if (is_blocked_properly(line, pre[index], suf[index]))
+		fprintf(stderr, "%s: check if blocked properly\n", prog);
+		/* test is_blocked_properly */
+		if (is_blocked_properly(line, pre[index], suf[index])) {
+			fprintf(stderr, "%s: (pass) check if blocked properly\n", prog);
 			/* test if outer block exists */
+			fprintf(stderr, "%s: check if outer-blocked\n", prog);
 			if (is_outer_blocked(line, pre[index], suf[index])) {
 				/* fcutnstr, bcutnstr */
+				fprintf(stderr, "%s: (pass) check if outer-blocked\n", prog);
+				fprintf(stderr, "%s: removing the outer block \"%s\" \"%s\"\n", prog, pre[index], suf[index]);
 				fcutnstr(line, strlen(pre[index]));
 				bcutnstr(line, strlen(suf[index]));
-			}
+				fprintf(stderr, "%s: removed the outer block\n", prog);
+			} else
+				fprintf(stderr, "%s: (fail) check if outer-blocked\n", prog);
+		} else
+			fprintf(stderr, "%s: (fail) check if blocked properly\n", prog);
 	}
+	fprintf(stderr, "%s: (end) \"%s\"\n", prog, line);
 }
 void testremove_outer_block_blk(void)
 {
