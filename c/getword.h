@@ -6,48 +6,48 @@
 #include "_getword.h"
 
 /* getword: get next word or character from input */
-int getword(char *word, unsigned int lim);
+int getword(char *word, int lim);
 void testgetword(void);
 	
 /* sgetword: getword from string while moving pointer next to the word */
-int sgetword(char **s, char *word, unsigned int lim);
+int sgetword(char **s, char *word, int lim);
 void testsgetword(char *s);
 
 /* getalnum: get next word or character or number from input */
-int getalnum(char *word, unsigned int lim);
+int getalnum(char *word, int lim);
 void testgetalnum(void);
 
 /* sgetalnum: getalnum from string while moving pointer next to the word */
-int sgetalnum(char **s, char *word, unsigned int lim);
+int sgetalnum(char **s, char *word, int lim);
 void testsgetalnum(char *s);
 
 /* ismathword: in addition to alnum, '.' and '-' should be understood as part of a "word" as a mathematical quantity */
 int ismathword(char c);
 
 /* getwordg: getword generalized, accapting more criteria like crit=ismathword */
-int getwordg(char *word, unsigned int lim, int (*crit)(char ));
+int getwordg(char *word, int lim, int (*crit)(char ));
 void testgetwordg(int (*crit)(char ));
 
 /* sgetwordg: getwordg from string while moving pointer next to the word */
-int sgetwordg(char **s, char *word, unsigned int lim, int (*crit)(char ));
+int sgetwordg(char **s, char *word, int lim, int (*crit)(char ));
 void testsgetwordg(char *s, int (*crit)(char ));
 
 /* fcutnstr: cuts off the first n characters */
-void fcutnstr(char s[], unsigned int n);
+void fcutnstr(char s[], int n);
 void testfcutnstr(int n);
 
 /* fcutstr: fcutnstr( , 1) */
 void fcutstr(char s[]);
 
 /* bcutnstr: cuts of n characters from the back */
-void bcutnstr(char s[], unsigned int n);
+void bcutnstr(char s[], int n);
 void testbcutnstr(int n);
 
 /* bcutstr: bcutnstr( , 1) */
 void bcutstr(char s[]);
 
 /* shrknstr: removes the first and last n characters of a string */
-void shrknstr(char s[], unsigned int n);
+void shrknstr(char s[], int n);
 void testshrknstr(int n);
 
 /* shrkstr: shrknstr( , 1) */
@@ -78,7 +78,7 @@ char *strrstr(char *line, char *word);
 void teststrrstr(void);
 
 /* strstrblk: strstr against bulk search words such as { "search", "word1", "word2", NULL } and returning the first occurence of any of them */
-char *strstrblk(char *line, char **words, unsigned int *index);
+char *strstrblk(char *line, char **words, int *index);
 void teststrstrblk(void);
 
 /* is_blocked_properly */
@@ -90,7 +90,7 @@ char *pastblock(char line[], char **pre, char **suf);
 void testpastblock(void);
 
 /* strstrmaskblk: strstr, but masking blocks specified by bulk (multiple) block indicators such as pre={ "(", "{", "[", NULL } & suf={ ")", "}", "]", NULL } */
-char *strstrmaskblk(char line[], char *word, unsigned int *index, char **pre, char **suf);
+char *strstrmaskblk(char line[], char *word, int *index, char **pre, char **suf);
 void teststrstrmaskblk(void);
 
 /* strstrmask: strstr with masking part of the string */

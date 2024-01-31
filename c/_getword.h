@@ -17,7 +17,7 @@
 #define MAXCHAR 1024
 
 /* getword: get next word or character from input */
-int getword(char *word, unsigned int lim)
+int getword(char *word, int lim)
 {
 	int c = 0;
 	char *w = word;
@@ -46,7 +46,7 @@ void testgetword(void)
 }
 
 /* sgetword: get next word from string while reducing it */
-int sgetword(char **s, char *word, unsigned int lim)
+int sgetword(char **s, char *word, int lim)
 {
 	int c = 0;
 	char *w = word;
@@ -76,7 +76,7 @@ void testsgetword(char *s)
 }
 
 /* getalnum: get next word or character or number from input */
-int getalnum(char *word, unsigned int lim)
+int getalnum(char *word, int lim)
 {
 	int c = 0;
 	char *w = word;
@@ -105,7 +105,7 @@ void testgetalnum(void)
 }
 
 /* sgetalnum: getalnum from string while reducing it */
-int sgetalnum(char **s, char *word, unsigned int lim)
+int sgetalnum(char **s, char *word, int lim)
 {
 	int c = 0;
 	char *w = word;
@@ -141,7 +141,7 @@ int ismathword(char c)
 }
 
 /* getwordg: getword generalized */
-int getwordg(char *word, unsigned int lim, int (*crit)(char ))
+int getwordg(char *word, int lim, int (*crit)(char ))
 {
 	int c = 0;
 	char *w = word;
@@ -170,7 +170,7 @@ void testgetwordg(int (*crit)(char ))
 }
 
 /* sgetwordg: getwordg from string while reducing it */
-int sgetwordg(char **s, char *word, unsigned int lim, int (*crit)(char ))
+int sgetwordg(char **s, char *word, int lim, int (*crit)(char ))
 {
 	int c = 0;
 	char *w = word;
@@ -199,7 +199,7 @@ void testsgetwordg(char *s, int (*crit)(char ))
 }
 
 /* fcutnstr: cuts off the first n characters */
-void fcutnstr(char s[], unsigned int n)
+void fcutnstr(char s[], int n)
 {
 	if (s != NULL && n <= strlen(s)) {
 		/*s += n;*/
@@ -226,10 +226,10 @@ void fcutstr(char s[])
 }
 
 /* bcutnstr: cuts of n characters from the back */
-void bcutnstr(char s[], unsigned int n)
+void bcutnstr(char s[], int n)
 {
 	char *prog = "bcutnstr";
-	unsigned int m = strlen(s);
+	int m = strlen(s);
 
 	if (s == NULL || m < n)
 		;
@@ -252,7 +252,7 @@ void bcutstr(char s[])
 }
 
 /* shrknstr: removes the first and last n characters of a string */
-void shrknstr(char s[], unsigned int n)
+void shrknstr(char s[], int n)
 {
 	fcutnstr(s, n);
 	bcutnstr(s, n);
@@ -378,7 +378,7 @@ void teststrrstr(void)
 }
 
 /* strstrblk: strstr against bulk search words such as { "search", "word1", "word2", NULL } and returning the first occurence of any of them */
-char *strstrblk(char *line, char **words, unsigned int *index)
+char *strstrblk(char *line, char **words, int *index)
 {
 	char *prog = "strstrblk";
 	char *p, *q = line + strlen(line);
@@ -407,7 +407,7 @@ void teststrstrblk(void)
 {
 	char *line = "abc 123 def 456 ghi 789";
 	char *words[] = { "456", "ghi", "def", NULL };
-	unsigned int i = 0;
+	int i = 0;
 
 	printf("input: \"%s\"\n", line);
 	printf("words: { ");
@@ -716,7 +716,7 @@ void remove_outer_block_blk(char line[], char **pre, char **suf)
 	if (line != NULL && pre != NULL && suf != NULL) {
 		/* obtain the left-most block opening */
 		char *p = NULL;
-		unsigned int index = 0;
+		int index = 0;
 
 		p = strstrblk(line, pre, &index);
 
@@ -792,8 +792,75 @@ void testremove_outer_block(void)
 char *pastblock(char line[], char **pre, char **suf)
 {
 	char *prog = "pastblock";
+
+	fprintf(stderr, "%s: (start) \"%s\"\n", prog, line);
+
+	char *p = NULL;
+
+	// (1) check if properly blocked, return NULL if fails
+	// (2) check if outer blocks are removed, return NULL if fails
+	// (3) detect the earliest occuring b_start
+	// (4) c = 1, p = strstr(line, pre[i]) + strlen(pre[i])
+	// (5) because of (1) & (2), c == 0 at the end. return it.
+	
+	// (1) check if properly blocked (bulk), return NULL if fails
+	int index = 0;
+	if (is_blocked_properly_blk(line, pre, suf, &index)) {
+		index = 0;
+	// (2) check if outer blocks are removed, return NULL if fails
+		while (is_outer_blocked_blk(line, pre, suf, &index))
+			remove_outer_block_blk(line, pre, suf);
+	}
+
+	// (3) detect the earliest occuring b_start
+	index = 0;
+	p = strstrblk(line, pre, &index);
+	if (p == NULL)
+		return NULL;
+
+	// (4) c = 1, p = strstr(line, pre[i]) + strlen(pre[i])
+	int c = 0;
+	char *q, *r;
+	fprintf(stderr, "%s: (target) c=%d, \"%s\" \"%s\" %s\n", prog, c, pre[index], suf[index], p);
+	while (c >= 0) {
+		q = strstr(p, pre[index]);
+		r = strstr(p, suf[index]);
+		if (q != NULL && r != NULL) {
+			if (q < r) {
+				p = q + strlen(pre[index]);
+				c++;
+			} else {
+				p = r + strlen(suf[index]);
+				c--;
+			}
+		}
+		if (q != NULL && r == NULL) {
+			return NULL;
+		}
+		if (q == NULL && r != NULL) {
+			p = r + strlen(suf[index]);
+			c--;
+		}
+		if (q == NULL && r == NULL) {
+	// (5) because of (1) & (2), c == 0 at the end. return it.
+			if (c == 0)
+				c = -1;
+			else
+				return NULL;
+		}
+		fprintf(stderr, "%s: c=%d, \"%s\" \"%s\" %s\n", prog, c, pre[index], suf[index], p);
+	}
+
+	return p;
+}
+char *pastblock2(char line[], char **pre, char **suf)
+{
+	char *prog = "pastblock";
+
+	fprintf(stderr, "%s: (start) \"%s\"\n", prog, line);
+	
 	char *p, *q, *r;
-	unsigned int i = 0;
+	int i = 0;
 	int c = 0, is_first_block = 0;
 
 	if (line == NULL || pre == NULL || suf == NULL) {
@@ -807,6 +874,8 @@ char *pastblock(char line[], char **pre, char **suf)
 
 	/* check if parentheses are properly placed. */
 	/* check if it's not the " % (y + z" case. */
+	fprintf(stderr, "%s: (target) \"%s\" \"%s\" \"%s\"\n", prog, pre[i], suf[i], p);								/* (((x + y) + z) * (y + z)) */
+	fprintf(stderr, "%s: checking if blocks are proper\n", prog);								/* (((x + y) + z) * (y + z)) */
 	if (is_blocked_properly(line, pre[i], suf[i])) {
 		fprintf(stderr, "%s: blocked properly.\n", prog);
 		/* count occurence of pre[i] and suf[i] */
@@ -821,7 +890,7 @@ char *pastblock(char line[], char **pre, char **suf)
 			c = 1;
 			is_first_block = 1;
 			p += strlen(pre[i]);			/* ((x + y) + z) * (y + z)) */
-			fprintf(stderr, "%s: pre[i]=%s, suf[i]=%s, p=%s\n", prog, pre[i], suf[i], p);
+			fprintf(stderr, "%s: (target reminder) c=%d, \"%s\" \"%s\" \"%s\"\n", prog, c, pre[i], suf[i], p);
 			while (c > 0) {
 				q = strstr(p, pre[i]);
 				r = strstr(p, suf[i]);
@@ -833,11 +902,13 @@ char *pastblock(char line[], char **pre, char **suf)
 					if (r == NULL) {
 						/* q == NULL && r == NULL  implies c == 0 */
 						/* so reaching here means error */
+						fprintf(stderr, "%s: q == NULL && r == NULL\n", prog);
 						fprintf(stderr, "%s: error, c=%d, but no more \"%s\" and \"%s\". check if blocks are made properly.\n", prog, c, pre[i], suf[i]);
 						return NULL;
 					} else {
 						/* q == NULL && r != NULL normal like y + z) */
 						/* when ((ab)c) is provided, the code will convert it into (ab)c first. */
+						fprintf(stderr, "%s: q == NULL && r != NULL\n", prog);
 						fprintf(stderr, "%s: r=\"%s\"\n", prog, r);
 						if (is_first_block) {
 							/* if it's x + y) * z from the beginning,
@@ -869,10 +940,12 @@ char *pastblock(char line[], char **pre, char **suf)
 					if (r == NULL) {
 						/* q != NULL && r == NULL error */
 						/* more pre[i] than suf[i] for sure */
+						fprintf(stderr, "%s: q != NULL && r == NULL\n", prog);
 						fprintf(stderr, "%s: error, there are more \"%s\" than \"%s\" for sure, please revise the input.\n", prog, pre[i], suf[i]);
 						return NULL;
 					} else {
 						/* q != NULL && r != NULL normal, keep updating c */
+						fprintf(stderr, "%s: q != NULL && r != NULL\n", prog);
 						if (q < r) {
 							/* pre[i] detected first */
 							fprintf(stderr, "%s: c=%d, q=\"%s\"\n", prog, c, q);
@@ -895,7 +968,7 @@ char *pastblock(char line[], char **pre, char **suf)
 				fprintf(stderr, "%s: result found:\n%s\n", prog, line);
 				for (int i = 0; i < p - line; i++)
 					fprintf(stderr, " ");
-				fprintf(stderr, "%s\n", p);
+				fprintf(stderr, "%s: pass, \"%s\"\n", p, line);
 				return p;
 			} else {
 				/* c < 0? impossible */
@@ -914,8 +987,8 @@ char *pastblock(char line[], char **pre, char **suf)
 }
 void testpastblock(void)
 {
-	char line[MAXCHAR] = "[[[x + y] + y] * [y + z]]";
-	char *word = "y";
+	//char line[MAXCHAR] = "[[[x + y] + y] * [y + z]]";
+	char line[MAXCHAR] = "(a * (b - c) / d) / y";
 	char *pre[] = { "(", "[", "{", NULL };
 	char *suf[] = { ")", "]", "}", NULL };
 
@@ -924,7 +997,7 @@ void testpastblock(void)
 }
 
 /* strstrmaskblk: strstr, but masking blocks specified by bulk (multiple) block indicators such as pre={ "(", "{", "[", NULL } & suf={ ")", "}", "]", NULL } */
-char *strstrmaskblk(char line[], char *word, unsigned int *index, char **pre, char **suf)
+char *strstrmaskblk(char line[], char *word, int *index, char **pre, char **suf)
 {
 	/* mission: make this function yield a pointer inside line (so that we can to pointer arithmetic with the outcome), and also, if possible, leave no dynamically allocated memories un-freed. */
 	/* mission accomplished. */
@@ -971,7 +1044,7 @@ void teststrstrmaskblk(void)
 	char *word = " + ";
 	char *pre[] = { "(", "[", "{", NULL };
 	char *suf[] = { ")", "]", "}", NULL };
-	unsigned int i = 0;
+	int i = 0;
 
 	printf("line: \"%s\"\n", line);
 	printf("word: \"%s\"\n", word);
@@ -984,7 +1057,7 @@ char *strstrmask(char line[], char *word, char *pre, char *suf)
 {
 	char *pre2[] = { pre, NULL };
 	char *suf2[] = { suf, NULL };
-	unsigned int index = 0;
+	int index = 0;
 
 	return strstrmaskblk(line, word, &index, pre2, suf2);
 }
@@ -1004,11 +1077,11 @@ void teststrstrmask(void)
 
 /* strstrblkmaskblk: strstr with bulk search words, with respect to bulk masking words */
 /* index return is for bulk_words */
-char *strstrblkmaskblk(char line[], char **bulk_words, unsigned int *index, char **pre, char **suf)
+char *strstrblkmaskblk(char line[], char **bulk_words, int *index, char **pre, char **suf)
 {
 	char *prog = "strstrblkmaskblk";
 	char *p, *q = NULL;
-	unsigned int dummy_index = 0;
+	int dummy_index = 0;
 
 	for (int i = 0; bulk_words[i] != NULL; i++) {
 		p = strstrmaskblk(line, bulk_words[i], &dummy_index, pre, suf);
@@ -1051,7 +1124,7 @@ void teststrstrblkmaskblk(void)
 		"}",
 		NULL
 	};
-	unsigned int index = 0;
+	int index = 0;
 
 	printf("input: %s\n", line);
 	//printf("%s: %s\n", prog, strstrblkmaskblk(line, words, &index, pre, suf));
