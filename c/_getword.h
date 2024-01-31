@@ -832,6 +832,8 @@ char *pastblock(char line[], char **pre, char **suf)
 			} else {
 				p = r + strlen(suf[index]);
 				c--;
+				if (c == 0)
+					c = -1;
 			}
 		}
 		if (q != NULL && r == NULL) {
@@ -840,6 +842,8 @@ char *pastblock(char line[], char **pre, char **suf)
 		if (q == NULL && r != NULL) {
 			p = r + strlen(suf[index]);
 			c--;
+			if (c == 0)
+				c = -1;
 		}
 		if (q == NULL && r == NULL) {
 	// (5) because of (1) & (2), c == 0 at the end. return it.
@@ -856,7 +860,8 @@ char *pastblock(char line[], char **pre, char **suf)
 void testpastblock(void)
 {
 	//char line[MAXCHAR] = "[[[x + y] + y] * [y + z]]";
-	char line[MAXCHAR] = "(a * (b - c) / d) / y";
+	//char line[MAXCHAR] = "(a * (b - c) / d) / y";
+	char line[MAXCHAR] = "(b / d) - (c / d)";
 	char *pre[] = { "(", "[", "{", NULL };
 	char *suf[] = { ")", "]", "}", NULL };
 
