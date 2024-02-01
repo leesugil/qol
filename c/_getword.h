@@ -1015,10 +1015,20 @@ void printn(char *s, int n)
 /* convertNegSign: "-x" --> "-1 * x" */
 void convertNegSign(char s[])
 {
+	if (strcmp(s, "") == 0)
+		return;
+	if (strlen(s) < 2)
+		return;
 	if (s[0] == '-') {
-		char t[MAXCHAR] = "-1 * ";
-		strcat(t, s+1);
-		strcpy(s, t);
+		char t[MAXCHAR] = "";
+		strncpy(t, s, 2);
+		printf("***********************%s\n", t);
+		if (strtod(t, NULL) == 0) {
+			printf("!! !! !! !! !! !! !! !!%s\n", t);
+			strcpy(t, "-1 * ");
+			strcat(t, s+1);
+			strcpy(s, t);
+		}
 	}
 }
 
