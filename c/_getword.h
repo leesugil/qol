@@ -1012,6 +1012,15 @@ void printn(char *s, int n)
 		printf("%s", s);
 }
 
+/* convertNegSign: "-x" --> "-1 * x" */
+void convertNegSign(char s[])
+{
+	if (s[0] == '-') {
+		char t[MAXCHAR] = "-1 * ";
+		strcat(t, s+1);
+		strcpy(s, t);
+	}
+}
 
 
 #endif	/* _GETWORD_H */
