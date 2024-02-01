@@ -1030,5 +1030,39 @@ void convertNegSign(char s[])
 	}
 }
 
+/* strtod2: strtod but keeps searching for numbers in a mixed string */
+double strtod2(char *s, char **endp)
+{
+	double output = strtod(s, endp);
+
+	if (strcmp(s, *endp) != 0)
+		return output;
+	// scan next
+	while (strcmp(s, *endp) == 0 && strlen(s) > 0) {
+		s++;
+		output = strtod(s, endp);
+	}
+	return output;
+}
+void teststrtod2(void)
+{
+	//char *line = "1.1 -2 -4e-2 -3^2";
+	//char *line = "1.1 -2 -4e-2";
+	char *line = "-2 * 3 * a * 7 * -1";
+	char *p = line;
+	double num = 0;
+
+	printf("line:%s\n", line);
+
+	int c = 1;
+	while (c > 0) {
+		p = line;
+		num = strtod2(line, &line);
+		printf("line:%s (before)\n", p);
+		printf("line:%s (after)\n", line);
+		c = line - p;
+		printf("%g\n", num);
+	}
+}
 
 #endif	/* _GETWORD_H */
