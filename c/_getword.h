@@ -1030,15 +1030,21 @@ void convertNegSign(char s[])
 	}
 }
 
-/* strtod2: strtod but keeps searching for numbers in a mixed string */
-double strtod2(char *s, char **endp)
+/* strtod2: strtod but keeps searching for numbers in a mixed string, until stop appears */
+double strtod2(char *s, char *stop, char **endp)
 {
 	double output = strtod(s, endp);
 
 	if (strcmp(s, *endp) != 0)
 		return output;
 	// scan next
-	while (strcmp(s, *endp) == 0 && strlen(s) > 0) {
+	if (strcmp(stop, "") == 0)
+		stop = NULL;
+	while (strcmp(s, *endp) == 0 &&
+			strlen(s) > 0) {
+		if (stop != NULL &&
+				strcmp(s, strstr(s, stop)) == 0)
+			break;
 		s++;
 		output = strtod(s, endp);
 	}
@@ -1048,16 +1054,34 @@ void teststrtod2(void)
 {
 	//char *line = "1.1 -2 -4e-2 -3^2";
 	//char *line = "1.1 -2 -4e-2";
-	char *line = "-2 * 3 * a * 7 * -1";
+	//char *line = "-2 * 3 * a * 7 * -1";
+	char *line = "(-1 * (a + b)) * -1 / 2 * c";
 	char *p = line;
 	double num = 0;
+	char *stop = "";
 
 	printf("line:%s\n", line);
 
+	printf("stop:\"%s\"\n", stop);
 	int c = 1;
 	while (c > 0) {
 		p = line;
-		num = strtod2(line, &line);
+		num = strtod2(line, stop, &line);
+		printf("line:%s (before)\n", p);
+		printf("line:%s (after)\n", line);
+		c = line - p;
+		printf("%g\n", num);
+	}
+
+	stop = " / ";
+	printf("change of stop to \"%s\"\n", stop);
+	line = "(-1 * (a + b)) * -1 / 2 * c";
+	p = line;
+	num = 0;
+	c = 1;
+	while (c > 0) {
+		p = line;
+		num = strtod2(line, stop, &line);
 		printf("line:%s (before)\n", p);
 		printf("line:%s (after)\n", line);
 		c = line - p;
