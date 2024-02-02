@@ -534,7 +534,7 @@ int is_blocked_properly_blk(char *line, char **pre, char **suf, int *index)
 		output *= is_blocked_properly(line, pre[i], suf[i]);
 		if (output == 0) {
 			// failed
-			fprintf(stdout, "%s: \"%s\" \"%s\" \"%s\" failed\n", prog, pre[i], suf[i], line);
+			fprintf(stderr, "%s: \"%s\" \"%s\" \"%s\" failed\n", prog, pre[i], suf[i], line);
 			*index = i;
 			return 0;
 		}
@@ -1094,22 +1094,42 @@ void teststrtod2(void)
  * 1) pure number
  * 2) number first, followed by characters
  * 3) pure characters
- * returns 1 if pure number, 2 if pure characters, 0 if case 2), -1 for error*/
-int is_pure_number(char *s)
+ * returns 1 if pure number, 0 if pure characters, 2 for case 2), -1 for error */
+int is_pure_number(char *s, char **endp)
 {
+	char *prog = "is_pure_number";
+
+	fprintf(stderr, "%s: (start) \"%s\"\n", prog, s);
+
 	if (s == NULL)
 		return -1;
 
 	char *p = s;
 	double value = 0;
 
-	value = strtod(p, &p);
-	if (strlen(p) == 0)
+	value = strtod(s, &p);
+	if (endp != NULL)
+		*endp = p;
+	if (strlen(p) == 0) {
+		fprintf(stderr, "%s: (end) \"%s\" is a pure number\n", prog, s);
 		return 1;
-	if (strcmp(s, p) == 0)
-		return 2;
+	}
+	if (strcmp(s, p) == 0) {
+		fprintf(stderr, "%s: (end) \"%s\" is made of pure characters\n", prog, s);
+		return 0;
+	}
 
-	return 0;
+	fprintf(stderr, "%s: (end) \"%s\" is a number-character composite\n", prog, s);
+	return 2;
+}
+void testis_pure_number(void)
+{
+	char *s = "4";
+	char *p = NULL;
+
+	printf("s:%s\n", s);
+	printf("n:%d\n", is_pure_number(s, &p));
+	printf("p:%s\n", p);
 }
 
 #endif	/* _GETWORD_H */
