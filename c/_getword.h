@@ -1089,4 +1089,27 @@ void teststrtod2(void)
 	}
 }
 
+/* is_pure_number:
+ * check if a string is one of the following three:
+ * 1) pure number
+ * 2) number first, followed by characters
+ * 3) pure characters
+ * returns 1 if pure number, 2 if pure characters, 0 if case 2), -1 for error*/
+int is_pure_number(char *s)
+{
+	if (s == NULL)
+		return -1;
+
+	char *p = s;
+	double value = 0;
+
+	value = strtod(p, &p);
+	if (strlen(p) == 0)
+		return 1;
+	if (strcmp(s, p) == 0)
+		return 2;
+
+	return 0;
+}
+
 #endif	/* _GETWORD_H */
