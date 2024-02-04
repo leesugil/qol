@@ -252,6 +252,15 @@ void bcutstr(char s[])
 	bcutnstr(s, 1);
 }
 
+void firstnstr(char s[], int n)
+{
+	bcutnstr(s, strlen(s) - n);
+}
+void lastnstr(char s[], int n)
+{
+	fcutnstr(s, strlen(s) - n);
+}
+
 /* shrknstr: removes the first and last n characters of a string */
 void shrknstr(char s[], int n)
 {
@@ -785,13 +794,6 @@ void testremove_outer_block(void)
 }
 
 /* pastblock: ([a{bc}(d)e]fg) -> fg */
-/* error-case found:
- * pastblock: c=1, r=") % (y + z"
- * pastblock: => c=0, p=" % (y + z"
- * pastblock: result found:
- * ((x + y) * y) % (y + z
- * 				 % (y + z
- * strstrmaskblk: searching " + " after the block as in " % (y + z" */
 char *pastblock(char line[], char **pre, char **suf)
 {
 	char *prog = "pastblock";
