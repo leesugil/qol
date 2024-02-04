@@ -670,7 +670,8 @@ int is_outer_blocked_blk(char *line, char **pre, char **suf, int *index)
 	if (line == NULL || pre == NULL || suf == NULL)
 		return 0;
 
-	*index = -1;
+	if (index != NULL)
+		*index = -1;
 	
 	char *p = NULL;
 	int i, output = 0;
@@ -679,7 +680,8 @@ int is_outer_blocked_blk(char *line, char **pre, char **suf, int *index)
 	for (i = 0; pre[i] != NULL || suf[i] != NULL; i++) {
 		output += is_outer_blocked(line, pre[i], suf[i]);
 		if (output == 1) {
-			*index = i;
+			if (index != NULL)
+				*index = i;
 			return 1;
 		}
 	}
