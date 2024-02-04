@@ -29,7 +29,7 @@ Node *addNode(Node *p, char *name)
 		p->count = 1;
 		p->left = NULL;
 		p->right = NULL;
-	} else if ((cond = strcmp(name, p->name)) == 0)
+	} else if ((cond = strcmp(p->name, name)) == 0)
 		p->count++;
 	else if (cond < 0)
 		p->left = addNode(p->left, name);
@@ -56,7 +56,7 @@ Node *getNode(Node *p, char *name)
 
 	if (p == NULL)
 		return NULL;
-	else if ((cond = strcmp(name, p->name)) == 0)
+	else if ((cond = strcmp(p->name, name)) == 0)
 		return p;
 	else if (cond < 0) {
 		fprintf(stderr, "getNode: taking left from p->name: %s\n", p->name);
