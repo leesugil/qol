@@ -403,13 +403,18 @@ char *strstrblk(char *line, char **words, int *index)
 			if (p < q) {
 				fprintf(stderr, "strstrblk: word \"%s\" detected.\n", words[i]);
 				q = p;
-				*index = i;
+				if (index != NULL)
+					*index = i;
 			}
 	if (strcmp(q, "") != 0) {
-		fprintf(stderr, "%s: words[%d]=\"%s\", detected at \"%s\".\n", prog, *index, words[*index], q);
+		if (index != NULL)
+			fprintf(stderr, "%s: words[%d]=\"%s\", detected at \"%s\".\n", prog, *index, words[*index], q);
 		return q;
 	} else {
-		fprintf(stderr, "%s: words[%d]=\"%s\" not detectedm returning NULL\n", prog, *index, words[*index]);
+		if (index != NULL) {
+			*index = -1;
+			fprintf(stderr, "%s: words[%d]=\"%s\" not detected, returning NULL\n", prog, *index, words[*index]);
+		}
 		return NULL;
 	}
 }
@@ -533,7 +538,8 @@ int is_blocked_properly_blk(char *line, char **pre, char **suf, int *index)
 	if (line == NULL || pre == NULL || suf == NULL)
 		return 0;
 
-	*index = -1;
+	if (index != NULL)
+		*index = -1;
 	
 	char *p = NULL;
 	int i, output = 1;
@@ -543,8 +549,10 @@ int is_blocked_properly_blk(char *line, char **pre, char **suf, int *index)
 		output *= is_blocked_properly(line, pre[i], suf[i]);
 		if (output == 0) {
 			// failed
-			fprintf(stderr, "%s: \"%s\" \"%s\" \"%s\" failed\n", prog, pre[i], suf[i], line);
-			*index = i;
+			if (index != NULL) {
+				fprintf(stderr, "%s: \"%s\" \"%s\" \"%s\" failed\n", prog, pre[i], suf[i], line);
+				*index = i;
+			}
 			return 0;
 		}
 	}
@@ -893,11 +901,6 @@ char *strstrmaskblk(char line[], char *word, int *index, char **pre, char **suf)
 		return NULL;
 	}
 
-	fprintf(stderr, "%s: potential keyword found, checking if there are blocks to be masked...\n", prog);
-	if (pre != NULL) {
-		for (int k=0; pre[k] != NULL; k++)
-			fprintf(stderr, "%s\n", pre[k]);
-	}
 	char *q = strstrblk(line, pre, index);
 	if (q != NULL)
 		if (q < r) {
@@ -965,7 +968,8 @@ char *strstrblkmaskblk(char line[], char **bulk_words, int *index, char **pre, c
 		p = strstrmaskblk(line, bulk_words[i], &dummy_index, pre, suf);
 		if (q == NULL || (p != NULL && p < q)) {
 			q = p;
-			*index = i;
+			if (index != NULL)
+				*index = i;
 			fprintf(stderr, "%s: updating q=\"%s\"\n", prog, q);
 		}
 	}
@@ -1134,6 +1138,144 @@ void testis_pure_number(void)
 	printf("s:%s\n", s);
 	printf("n:%d\n", is_pure_number(s, &p));
 	printf("p:%s\n", p);
+}
+
+/* strrstrblk: strstrblk reversed */
+char *strrstrblk(char *line, char **words, int *index)
+{
+	char *prog = "strrstrblk";
+	char *p, *q = line;
+
+	if (line == NULL || words == NULL) {
+		return NULL;
+	}
+
+	for (int i = 0; words[i] != NULL; i++)
+		if ((p = strstr(line, words[i])) != NULL)
+			if (q < p) {
+				q = p;
+				if (index != NULL)
+					*index = i;
+			}
+	if (strcmp(q, line) != 0) {
+		return q;
+	} else {
+		if (index != NULL)
+			*index = -1;
+		return NULL;
+	}
+}
+void teststrrstrblk(void)
+{
+	char *line = "abc 123 def 456 ghi 789";
+	char *words[] = { "456", "ghi", "def", NULL };
+	int i = 0;
+
+	printf("input: \"%s\"\n", line);
+	printf("words: { ");
+	for (int j = 0; words[j] != NULL; j++)
+		printf("\"%s\", ", words[j]);
+	printf("\b\b }\n");
+	printf("index=%d\n", i);
+	printf("teststrrstrblk: \"%s\", index=%u\n", strrstrblk(line, words, &i), i);
+}
+
+/* strrstrmaskblk: strstrmaskblk reverse */
+char *strrstrmaskblk(char line[], char *word, int *index, char **pre, char **suf)
+{
+	char *prog = "strrstrmaskblk";
+
+	if (line == NULL || word == NULL)
+		return NULL;
+
+	// reverse line
+	char liner[MAXCHAR] = "";
+	strcpy(liner, line);
+	reverse(liner);
+
+	// reverse word
+	char wordr[MAXCHAR] = "";
+	strcpy(wordr, word);
+	reverse(wordr);
+
+	// reverse pre
+	int i;
+	for (i = 0; pre[i] != NULL; i++)
+		;
+	char prer[i][MAXCHAR];
+	for (int j = 0; j < i; j++) {
+		strcpy(prer[j], pre[j]);
+		reverse(prer[j]);
+	}
+	prer[i] = NULL;
+
+	// reverse suf
+	for (i = 0; suf[i] != NULL; i++)
+		;
+	char sufr[i][MAXCHAR];
+	for (int j = 0; j < i; j++) {
+		strcpy(sufr[j], suf[j]);
+		reverse(sufr[j]);
+	}
+	suf[i] = NULL;
+
+	// strstrmaskblk with reversed text
+	char *p = strstrmaskblk(liner, wordr, index, sufr, prer);
+	// line:  abXY(-cdXY-)
+	// word:  XY
+	// pre: { "(-", "{-", "[-", NULL }
+	// suf: { "-)", "-}", "-]", NULL }
+	//
+	// liner: )-YXdc-(YXba
+	// wordr: YX
+	// prer: { "-(", "-{", "-[", NULL }
+	// sufr: { ")-", "}-", "]-", NULL }
+	//
+	// p:     ********YXba
+	// p + strlen(wordr):
+	//        **********ba
+	// n = strlen(p + strlen(wordr));
+	// q = line + n:
+	//        **XY(-cdXY-)
+	if (p == NULL)
+		return NULL;
+	int n = strlen(p + strlen(wordr));
+	return line + n;
+}
+void teststrrstrmaskblk(void)
+{
+	char line[MAXCHAR] = "((x + y) + y)^(y + z)";
+	char *word = " + ";
+	char *pre[] = { "(", "[", "{", NULL };
+	char *suf[] = { ")", "]", "}", NULL };
+	int i = 0;
+
+	printf("line: \"%s\"\n", line);
+	printf("word: \"%s\"\n", word);
+	printf("strstr: \"%s\"\n", strstr(line, word));
+	printf("teststrrstrmaskblk: \"%s\"\n", strrstrmaskblk(line, word, &i, pre, suf));
+}
+
+/* strrstrmask: strstrmask reversed */
+char *strrstrmask(char line[], char *word, char *pre, char *suf)
+{
+	char *pre2[] = { pre, NULL };
+	char *suf2[] = { suf, NULL };
+
+	return strrstrmaskblk(line, word, NULL, pre2, suf2);
+}
+void teststrrstrmask(void)
+{
+	char line[MAXCHAR] = "((x + y) * (y + z))";
+	char *word = "y";
+	char *pre = "(";
+	char *suf = ")";
+
+	printf("line: \"%s\"\n", line);
+	printf("word: \"%s\"\n", word);
+	printf("strrstr: \"%s\"\n", strrstr(line, word));
+	printf("pre: \"%s\", suf: \"%s\"\n", pre, suf);
+	printf("teststrrstrmask: \"%s\"\n", strrstrmask(line, word, pre, suf));
 }
 
 #endif	/* _GETWORD_H */
