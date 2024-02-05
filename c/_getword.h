@@ -1202,9 +1202,9 @@ char *strrstrmaskblk(char line[], char *word, int *index, char **pre, char **suf
 	int i;
 	for (i = 0; pre[i] != NULL; i++)
 		;
-	char prer[i][MAXCHAR];
+	char *prer[i+1];
 	for (int j = 0; j < i; j++) {
-		strcpy(prer[j], pre[j]);
+		prer[j] = strdup(pre[j]);
 		reverse(prer[j]);
 	}
 	prer[i] = NULL;
@@ -1212,12 +1212,13 @@ char *strrstrmaskblk(char line[], char *word, int *index, char **pre, char **suf
 	// reverse suf
 	for (i = 0; suf[i] != NULL; i++)
 		;
-	char sufr[i][MAXCHAR];
+	char *sufr[i+1];
 	for (int j = 0; j < i; j++) {
+		sufr[j] = strdup(suf[j]);
 		strcpy(sufr[j], suf[j]);
 		reverse(sufr[j]);
 	}
-	suf[i] = NULL;
+	sufr[i] = NULL;
 
 	// strstrmaskblk with reversed text
 	char *p = strstrmaskblk(liner, wordr, index, sufr, prer);
@@ -1240,6 +1241,21 @@ char *strrstrmaskblk(char line[], char *word, int *index, char **pre, char **suf
 	if (p == NULL)
 		return NULL;
 	int n = strlen(p + strlen(wordr));
+
+	for (i = 0; pre[i] != NULL; i++)
+		;
+	for (int j = 0; j < i; j++) {
+		free(prer[j]);
+	}
+	free(prer[i]);
+	for (i = 0; suf[i] != NULL; i++)
+		;
+	for (int j = 0; j < i; j++) {
+		free(sufr[j]);
+	}
+	free(sufr[i]);
+
+
 	return line + n;
 }
 void teststrrstrmaskblk(void)
