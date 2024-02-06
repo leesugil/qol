@@ -1295,17 +1295,16 @@ void teststrrstrmask(void)
 }
 
 /* countnonnum: counts non-number characters in a string */
+// -1.2e34
 int countnonnum(char *s)
 {
 	int n = 0;
-	char c;
+	double dum;
 
 	while (*s != '\0') {
-		c = *(s++);
-		if (isdigit(c) != 0 &&
-				c != '-' &&
-				c != '.')
-			n++;
+		dum = strtod(s, &s);
+		s++;
+		n++;
 	}
 
 	return n;
