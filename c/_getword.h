@@ -1294,4 +1294,21 @@ void teststrrstrmask(void)
 	printf("teststrrstrmask: \"%s\"\n", strrstrmask(line, word, pre, suf));
 }
 
+/* countnonnum: counts non-number characters in a string */
+int countnonnum(char *s)
+{
+	int n = 0;
+	char c;
+
+	while (*s != '\0') {
+		c = *(s++);
+		if (isdigit(c) != 0 &&
+				c != '-' &&
+				c != '.')
+			n++;
+	}
+
+	return n;
+}
+
 #endif	/* _GETWORD_H */
