@@ -1304,14 +1304,21 @@ int countnonnum(char *s)
 
 	while (*s != '\0') {
 		dum = strtod(s, &p);
-		if (strcmp(s, p) == 0)
+		if (strcmp(s, p) == 0) {
 			s++;
-		else
+			n++;
+		} else
 			s = p;
-		n++;
 	}
 
 	return n;
+}
+void testcountnonnum(void)
+{
+	char *line = "x * (3 * y) * 2";
+
+	printf("%s\n", line);
+	printf("%d\n", countnonnum(line));
 }
 
 #endif	/* _GETWORD_H */
