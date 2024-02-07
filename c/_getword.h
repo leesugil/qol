@@ -1300,10 +1300,14 @@ int countnonnum(char *s)
 {
 	int n = 0;
 	double dum;
+	char *p;
 
 	while (*s != '\0') {
-		dum = strtod(s, &s);
-		s++;
+		dum = strtod(s, &p);
+		if (strcmp(s, p) == 0)
+			s++;
+		else
+			s = p;
 		n++;
 	}
 
