@@ -1321,4 +1321,37 @@ void testcountnonnum(void)
 	printf("%d\n", countnonnum(line));
 }
 
+int replacestr(char w[], char *s, char *r)
+{
+	char *p = w, *pp = p;
+	char line[MAXCHAR] = "", output[MAXCHAR] = "";
+	int n = 0;
+
+	while (p != NULL) {
+		pp = p;					// previous p
+		strcpy(line, pp);
+		p = strstr(p, s);		// n = p - pp
+		if (p != NULL) {
+			n++;
+			firstnstr(line, p - pp);
+			strcat(output, line);
+			strcat(output, r);
+			p += strlen(s);
+		}
+	}
+
+	strcat(output, pp);
+	strcpy(w, output);
+
+	return n;
+}
+void testreplacestr(void)
+{
+	char w[MAXCHAR] = "";
+	strcpy(w, "foo, bar!");
+	printf("%s\n", w);
+	replacestr(w, "oo", "^@@^");
+	printf("%s\n", w);
+}
+
 #endif	/* _GETWORD_H */
