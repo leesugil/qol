@@ -1030,6 +1030,7 @@ void convertNegSign(char s[])
 	if (s[0] == '-') {
 		char t[MAXCHAR] = "";
 		strncpy(t, s, 2);
+		t[2] = '\0';
 		if (strtod(t, NULL) == 0) {
 			strcpy(t, "-1 * ");
 			strcat(t, s+1);
