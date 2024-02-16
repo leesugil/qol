@@ -461,8 +461,6 @@ void testcountstrstr(void)
 }
 
 /* is_blocked_properly: check if any blocks (such as "(" & ")", "[" & "]", or "{" & "}") are placed propely. */
-/* the current version only checks if there are same number of block-starts and block-ends */
-// examples like )x+y( or [(x]+y would pass
 // returns TRUE if no blocks are detected as well
 int is_blocked_properly(char line[], char *pre, char *suf)
 {
@@ -527,6 +525,10 @@ void testis_blocked_properly(void)
 	printf("testis_blocked_properly: %d\n", is_blocked_properly(line1, pre, suf));
 
 	printf("input: %s\n", line2);
+	printf("testis_blocked_properly: %d\n", is_blocked_properly(line2, pre, suf));
+
+	char line3[MAXCHAR] = ")foo-bar(";
+	printf("input: %s\n", line3);
 	printf("testis_blocked_properly: %d\n", is_blocked_properly(line2, pre, suf));
 }
 
