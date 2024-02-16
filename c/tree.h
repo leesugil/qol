@@ -12,7 +12,7 @@ struct Node {
 	int count;
 	Node *left;
 	Node *right;
-}
+};
 
 static Node *nodeAlloc(void)
 {
