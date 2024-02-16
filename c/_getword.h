@@ -1371,4 +1371,32 @@ char *parseSV(char w[], char *line, char *delimiter)
 	return p + strlen(delimiter);
 }
 
+/* parseSVmask: parseSV with masking */
+char *parseSVmask(char w[], char *line, char *delimiter, char *pre, char *suf)
+{
+	w[0] = '\0';
+	if (line == NULL || delimiter == NULL || strlen(delimiter) == 0)
+		return line;
+	strcpy(w, line);
+	char *p = strstrmask(line, delimiter, pre, suf);
+	if (p == NULL)
+		return line + strlen(line);
+	bcutnstr(w, strlen(p));
+	return p + strlen(delimiter);
+}
+
+/* parseSVmaskblk: parseSVmask with multiple masking variables */
+char *parseSVmaskblk(char w[], char *line, char *delimiter, char **pre, char **suf)
+{
+	w[0] = '\0';
+	if (line == NULL || delimiter == NULL || strlen(delimiter) == 0)
+		return line;
+	strcpy(w, line);
+	char *p = strstrmaskblk(line, delimiter, NULL, pre, suf);
+	if (p == NULL)
+		return line + strlen(line);
+	bcutnstr(w, strlen(p));
+	return p + strlen(delimiter);
+}
+
 #endif	/* _GETWORD_H */
