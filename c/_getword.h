@@ -1355,4 +1355,18 @@ void testreplacestr(void)
 	printf("%s\n", w);
 }
 
+/* parseSeperatedValue: like parsing values one at a time in CSV except the comma is generalized to any string */
+char *parseSV(char w[], char *line, char *delimiter)
+{
+	w[0] = '\0';
+	if (line == NULL || delimiter == NULL || strlen(delimiter) == 0)
+		return line;
+	strcpy(w, line);
+	char *p = strstr(line, delimiter);
+	if (p == NULL)
+		return line + strlen(line);
+	bcutnstr(w, strlen(p));
+	return p + strlen(delimiter);
+}
+
 #endif	/* _GETWORD_H */
