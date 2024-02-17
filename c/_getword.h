@@ -1399,4 +1399,85 @@ char *parseSVmaskblk(char w[], char *line, char *delimiter, char **pre, char **s
 	return p + strlen(delimiter);
 }
 
+/* parseFuncArg: given a valid function form f(x, y), parses the argument part x, y. pre and suf are the block options { "(", "[", "{", NULL }
+ * the current versions of
+ * parseFuncArg, parseFuncName, parseSymbName
+ * do not fully support all possible block options and
+ * only support { "(", NULL } */
+void parseFuncArg(char arg[], char *name)
+{
+	char *prog = "parseFuncArg";
+
+	arg[0] = '\0';
+	if (name == NULL || strlen(name) == 0)
+		return ;
+	if (name[strlen(name) - 1] != ')')
+		return ;
+	char line[MAXCHAR] = "";
+	strcpy(line, name);
+	char *pre[] = { "(", NULL };
+	char *suf[] = { ")", NULL };
+	while (is_outer_blocked_blk(line, pre, suf, NULL))
+		remove_outer_block_blk(line, pre, suf);
+	if (!is_blocked_properly_blk(line, pre, suf, NULL))
+		return;
+	char *s = strstr(line, "(");
+	if (s == NULL)
+		return ;
+	strcpy(arg, line);
+	fcutnstr(arg, s - line + 1);
+	fprintf(stdout, "%s: bcutstr: \"%s\"\t(before)\n", prog, arg);
+	bcutstr(arg);
+	fprintf(stdout, "%s: bcutstr: \"%s\"\t(after)\n", prog, arg);
+	if (!is_blocked_properly_blk(arg, pre, suf, NULL))
+		arg[0] = '\0';
+}
+void parseFuncName(char w[], char *name)
+{
+	if (w == NULL)
+		return;
+	w[0] = '\0';
+	if (name == NULL)
+		return;
+	/* case f(x, y) * z */
+	if (strlen(name) == 0 || name[strlen(name) - 1] != ')')
+		return;
+
+	/* case f((x)) */
+	/* case f(x + dx) - f(x) */
+	char *s = strstr(name, "(");
+	if (s != NULL) {					// f(
+		char arg[MAXCHAR] = "";
+		parseFuncArg(arg, name);
+		if (strlen(arg) == 0)
+			return;
+		strncpy(w, name, s - name + 1);
+		w[s - name + 1] = '\0';
+	} else
+		w[0] = '\0';
+}
+void parseSymbName(char w[], char *name)
+{
+	char *prog = "parseSymbName";
+
+	if (w == NULL)
+		return;
+	w[0] = '\0';
+	if (name == NULL)
+		return;
+	/* case f(x, y) * z */
+	/* case f(x + dx) - f(x) */
+
+	char *s = strstr(name, "(");
+	if (s != NULL) {
+		parseFuncName(w, name);
+		if (strlen(w) > 0) {
+			fprintf(stdout, "%s: bcutstr: \"%s\"\t(before)\n", prog, w);
+			bcutstr(w);
+			fprintf(stdout, "%s: bcutstr: \"%s\"\t(after)\n", prog, w);
+		}
+	} else
+		strcpy(w, name);
+}
+
 #endif	/* _GETWORD_H */
