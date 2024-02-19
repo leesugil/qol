@@ -90,5 +90,16 @@ void removeNodeBranch(Node *p)
 	p->right = NULL;
 }
 
+int nodelen(Node *p, int n)
+{
+	if (p == NULL)
+		return n;
+
+	n = nodelen(p->left, n);
+	n = nodelen(p->right, n);
+
+	return n + 1;
+}
+
 
 #endif	/* TREE_H */
