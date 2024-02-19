@@ -803,6 +803,21 @@ void testremove_outer_block(void)
 	printf("testremove_outer_block: \"%s\"\n", line);
 }
 
+/* remove_outer_blockS: apply remove_outer_block indefinite times until outer blocks are completely removed */
+void remove_outer_blocks(char line[], char *pre, char *suf)
+{
+	while (is_outer_blocked(line, pre, suf))
+		remove_outer_block(line, pre, suf);
+}
+
+/* remove_outer_blocks_blk */
+void remove_outer_blocks_blk(char line[], char **pre, char **suf)
+{
+	while (is_outer_blocked_blk(line, pre, suf, NULL))
+		remove_outer_block_blk(line, pre, suf);
+}
+
+
 /* pastblock: ([a{bc}(d)e]fg) -> fg */
 char *pastblock(char line[], char **pre, char **suf)
 {
@@ -1388,14 +1403,20 @@ char *parseSVmask(char w[], char *line, char *delimiter, char *pre, char *suf)
 /* parseSVmaskblk: parseSVmask with multiple masking variables */
 char *parseSVmaskblk(char w[], char *line, char *delimiter, char **pre, char **suf)
 {
+	char *prog = "parseSVmaskblk";
+
 	w[0] = '\0';
 	if (line == NULL || delimiter == NULL || strlen(delimiter) == 0)
 		return line;
 	strcpy(w, line);
+	while (is_outer_blocked_blk(w, pre, suf, NULL))
+		remove_outer_block_blk(w, pre, suf);
+	fprintf(stdout, "%s: input \"%s\"\n", prog, w);
 	char *p = strstrmaskblk(line, delimiter, NULL, pre, suf);
 	if (p == NULL)
 		return line + strlen(line);
 	bcutnstr(w, strlen(p));
+	fprintf(stdout, "%s: parsed \"%s\"\n", prog, w);
 	return p + strlen(delimiter);
 }
 
