@@ -1411,12 +1411,12 @@ char *parseSVmaskblk(char w[], char *line, char *delimiter, char **pre, char **s
 	strcpy(w, line);
 	while (is_outer_blocked_blk(w, pre, suf, NULL))
 		remove_outer_block_blk(w, pre, suf);
-	fprintf(stdout, "%s: input \"%s\"\n", prog, w);
+	fprintf(stderr, "%s: input \"%s\"\n", prog, w);
 	char *p = strstrmaskblk(line, delimiter, NULL, pre, suf);
 	if (p == NULL)
 		return line + strlen(line);
 	bcutnstr(w, strlen(p));
-	fprintf(stdout, "%s: parsed \"%s\"\n", prog, w);
+	fprintf(stderr, "%s: parsed \"%s\"\n", prog, w);
 	return p + strlen(delimiter);
 }
 
@@ -1447,9 +1447,9 @@ void parseFuncArg(char arg[], char *name)
 		return ;
 	strcpy(arg, line);
 	fcutnstr(arg, s - line + 1);
-	fprintf(stdout, "%s: bcutstr: \"%s\"\t(before)\n", prog, arg);
+	fprintf(stderr, "%s: bcutstr: \"%s\"\t(before)\n", prog, arg);
 	bcutstr(arg);
-	fprintf(stdout, "%s: bcutstr: \"%s\"\t(after)\n", prog, arg);
+	fprintf(stderr, "%s: bcutstr: \"%s\"\t(after)\n", prog, arg);
 	if (!is_blocked_properly_blk(arg, pre, suf, NULL))
 		arg[0] = '\0';
 }
@@ -1493,9 +1493,9 @@ void parseSymbName(char w[], char *name)
 	if (s != NULL) {
 		parseFuncName(w, name);
 		if (strlen(w) > 0) {
-			fprintf(stdout, "%s: bcutstr: \"%s\"\t(before)\n", prog, w);
+			fprintf(stderr, "%s: bcutstr: \"%s\"\t(before)\n", prog, w);
 			bcutstr(w);
-			fprintf(stdout, "%s: bcutstr: \"%s\"\t(after)\n", prog, w);
+			fprintf(stderr, "%s: bcutstr: \"%s\"\t(after)\n", prog, w);
 		}
 	} else
 		strcpy(w, name);
