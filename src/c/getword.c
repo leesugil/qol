@@ -6,7 +6,6 @@
  * */
 
 #include "qol/c/getword.h"
-#include "qol/c/tree.h"
 
 /* getword: get next word or character from input */
 int getword(char *word, int lim)

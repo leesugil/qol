@@ -21,9 +21,9 @@ MathNode *addMathNode(MathNode *p, char *name, char *pre, char *suf)
 	} else if ((cond = mathstrcmp(name, p->name, pre, suf)) == 0)
 		p->count++;
 	else if (cond < 0)
-		p->left = addMathNode(p->left, name);
+		p->left = addMathNode(p->left, name, pre, suf);
 	else
-		p->right = addMathNode(p->right, name);
+		p->right = addMathNode(p->right, name, pre, suf);
 
 	return p;
 }
@@ -45,7 +45,7 @@ MathNode *getMathNode(MathNode *p, char *name)
 
 	if (p == NULL)
 		return NULL;
-	else if ((cond = mathstrcmp(name, p->name)) == 0)
+	else if ((cond = mathstrcmp(name, p->name, NULL, NULL)) == 0)
 		return p;
 	else if (cond < 0) {
 		fprintf(stderr, "getMathNode: taking left from p->name: %s\n", p->name);

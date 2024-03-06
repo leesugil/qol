@@ -1,0 +1,7 @@
+/usr/local/lib/libqol.dylib
+/usr/local/include/qol/c/getmath.h
+/usr/local/include/qol/c/mathtree.h
+/usr/local/include/qol/c/getword.h
+/usr/local/include/qol/c/tree.h
+/usr/local/include/qol/c/posix.h
+/usr/local/include/qol/c/clock.h
