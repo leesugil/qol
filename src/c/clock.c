@@ -1,9 +1,4 @@
-#ifndef _CLOCK_H
-#define _CLOCK_H
-
-#include <stdio.h>
-#include <sys/time.h>
-#include <time.h>
+#include "qol/c/clock.h"
 
 struct timeval start_wall, end_wall;
 double elapsed_time;
@@ -53,5 +48,3 @@ void clock_end(void)
 {
 	sclock_end("");
 }
-
-#endif	/* _CLOCK_H */

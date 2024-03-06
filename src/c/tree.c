@@ -1,18 +1,6 @@
 /* Binary tree template */
 
-#ifndef TREE_H
-#define TREE_H
-
-#include <string.h>
-
-typedef struct Node Node;
-
-struct Node {
-	char *name;
-	int count;
-	Node *left;
-	Node *right;
-};
+#include "qol/c/tree.h"
 
 static Node *nodeAlloc(void)
 {
@@ -100,6 +88,3 @@ int nodelen(Node *p, int n)
 
 	return n + 1;
 }
-
-
-#endif	/* TREE_H */

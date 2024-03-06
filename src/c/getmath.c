@@ -1,8 +1,4 @@
-#ifndef GETMATH_H
-#define GETMATH_H
-
-#include "getword.h"
-#include "tree.h"
+#include "qol/c/getmath.h"
 
 /* parseFuncArg: given a valid function form f(x, y), parses the argument part x, y. pre and suf are the block options { "(", "[", "{", NULL }
  * the current versions of
@@ -130,5 +126,3 @@ void testpermutate(void)
 	permutate(line, "b * c * x * a * godzilla * kaizu", " * ");
 	printf("%s\n", line);
 }
-
-#endif		// GETMATH_H

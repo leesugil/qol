@@ -9,14 +9,7 @@
 #include <unistd.h>
 #endif
 
-void pos_sleep(unsigned int seconds)
-{
-	#ifdef _WIN32
-	Sleep(seconds * 1000);
-	#else
-	sleep(seconds);
-	#endif
-}
-
+/* pos_sleep: sleep command */
+void pos_sleep(unsigned int seconds);
 
 #endif	// POSIX_H

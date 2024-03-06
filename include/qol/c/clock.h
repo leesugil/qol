@@ -1,8 +1,6 @@
 #ifndef CLOCK_H
 #define CLOCK_H
 
-#include "_clock.h"
-
 /* run at the beginning of the code */
 void clock_start(void);
 void sclock_start(char *);

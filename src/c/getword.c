@@ -5,19 +5,8 @@
  * Sugil Steve Lee
  * */
 
-#ifndef _GETWORD_H
-#define _GETWORD_H
-
-#include <ctype.h>
-#include <stdio.h>
-#include <string.h>
-#include <ctype.h>
-#include <stdlib.h>
-#include <math.h>
-
-#include "tree.h"
-
-#define MAXCHAR 1024
+#include "qol/c/getword.h"
+#include "qol/c/tree.h"
 
 /* getword: get next word or character from input */
 int getword(char *word, int lim)
@@ -143,6 +132,11 @@ int ismathword(char c)
 	return isalnum(c) || (c == '.') || (c == '-');
 }
 
+int ismathterm(char c)
+{
+	return ismathword(c);
+}
+
 /* getwordg: getword generalized */
 int getwordg(char *word, int lim, int (*crit)(char ))
 {
@@ -223,6 +217,7 @@ void testfcutnstr(int n)
 	printf("testfcutnstr: \"%s\"\n", line);
 }
 
+/* fcutstr: fcutstr( , 1) */
 void fcutstr(char s[])
 {
 	fcutnstr(s, 1);
@@ -1448,5 +1443,3 @@ void _genSV(char w[], Node *node, char *delimiter)
 	}
 	_genSV(w, node->right, delimiter);
 }
-
-#endif	/* _GETWORD_H */

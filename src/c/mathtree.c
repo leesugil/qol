@@ -1,19 +1,6 @@
 /* Binary tree template */
 
-#ifndef TREE_H
-#define TREE_H
-
-#include <string.h>
-#include "getword.h"
-
-typedef struct MathNode MathNode;
-
-struct MathNode {
-	char *name;
-	int count;
-	MathNode *left;
-	MathNode *right;
-};
+#include "qol/c/mathtree.h"
 
 static MathNode *mathnodeAlloc(void)
 {
@@ -129,6 +116,3 @@ int mathstrcmp(char *s, char *t, char *pre, char *suf)
 
 	return 0;
 }
-
-
-#endif	/* TREE_H */

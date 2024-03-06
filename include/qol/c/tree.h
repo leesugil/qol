@@ -14,92 +14,22 @@ struct Node {
 	Node *right;
 };
 
-static Node *nodeAlloc(void)
-{
-	return (Node *) malloc(sizeof(Node));
-}
+static Node *nodeAlloc(void);
 
-Node *addNode(Node *p, char *name)
-{
-	int cond;
-
-	if (p == NULL) {
-		p = nodeAlloc();
-		p->name = strdup(name);
-		p->count = 1;
-		p->left = NULL;
-		p->right = NULL;
-	} else if ((cond = strcmp(name, p->name)) == 0)
-		p->count++;
-	else if (cond < 0)
-		p->left = addNode(p->left, name);
-	else
-		p->right = addNode(p->right, name);
-
-	return p;
-}
+Node *addNode(Node *p, char *name);
 
 /* listNode: in-order print of tree p */
-void listNode(Node *p)
-{
-	if (p != NULL) {
-		listNode(p->left);
-		printf("%s\n", p->name);
-		listNode(p->right);
-	}
-}
+void listNode(Node *p);
 
 /* getNode: returns a pointer to the Node found */
-Node *getNode(Node *p, char *name)
-{
-	int cond;
-
-	if (p == NULL)
-		return NULL;
-	else if ((cond = strcmp(name, p->name)) == 0)
-		return p;
-	else if (cond < 0) {
-		fprintf(stderr, "getNode: taking left from p->name: %s\n", p->name);
-		return getNode(p->left, name);
-	} else {
-		fprintf(stderr, "getNode: taking right from p->name: %s\n", p->name);
-		return getNode(p->right, name);
-	}
-}
+Node *getNode(Node *p, char *name);
 
 /* removeNode: frees a node and its branch below */
-void removeNode(Node *p)
-{
-	if (p != NULL) {
-		removeNode(p->left);
-		removeNode(p->right);
-		p->left = NULL;
-		p->right = NULL;
-		/* free all dynamically allocated members */
-		free(p->name);
-		free(p);
-	}
-}
+void removeNode(Node *p);
 
 /* removeNodeBranch: frees child nodes in the branch */
-void removeNodeBranch(Node *p)
-{
-	removeNode(p->left);
-	removeNode(p->right);
-	p->left = NULL;
-	p->right = NULL;
-}
+void removeNodeBranch(Node *p);
 
-int nodelen(Node *p, int n)
-{
-	if (p == NULL)
-		return n;
-
-	n = nodelen(p->left, n);
-	n = nodelen(p->right, n);
-
-	return n + 1;
-}
-
+int nodelen(Node *p, int n);
 
 #endif	/* TREE_H */
