@@ -1,4 +1,5 @@
 /usr/local/lib/libqol.dylib
+/usr/local/include/qol/cpp/random.h
 /usr/local/include/qol/c/getmath.h
 /usr/local/include/qol/c/mathtree.h
 /usr/local/include/qol/c/getword.h
