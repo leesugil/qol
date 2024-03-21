@@ -1,3 +1,6 @@
+// the current version is not optimized for performance, such as constructing/destructing engine objects per each function call.
+// use the standard library functions for distributable work.
+
 #ifndef RANDOM_H
 #define RANDOM_H
 
@@ -9,12 +12,20 @@
 #include <optional>
 
 // global random engine with optional seed argument
-std::default_random_engine& engine(std::optional<unsigned int> opt_s = std::nullopt)
+std::default_random_engine& engine(std::optional<unsigned int> seed = std::nullopt)
 {
-	static std::optional<unsigned int> seed;
-	if (opt_s) seed = opt_s;
-	static std::default_random_engine engine(seed.value_or(std::chrono::system_clock::now().time_since_epoch().count()));
+	static std::default_random_engine engine(std::chrono::system_clock::now().time_since_epoch().count());
+	if (seed) engine.seed(seed.value());
 	return engine;
+}
+
+// integer in uniform distribution in [min, max)
+auto uniformdi(int min, int max)
+{
+	return [min, max]() {
+		std::uniform_int_distribution<int> dist(min, max);
+		return dist(engine());
+	};
 }
 
 // integer in uniform distribution in [min, max)
@@ -22,7 +33,8 @@ int randint(int min, int max)
 {
 	if (max<min) std::swap(min, max);
 	else if (min==max) return min;
-	return std::uniform_int_distribution<>{min, max}(engine());
+	auto dist = uniformdi(min, max);
+	return dist();
 }
 
 // integer in uniform distribution in [0, max)
@@ -65,5 +77,15 @@ auto normald()
 {
 	return normald(0.0, 1.0);
 }
+
+// integer in binomial distribution B(n, p)
+auto binomiald(int n, double p)
+{
+	return [n, p]() mutable {
+		std::binomial_distribution<int> dist(n, p);
+		return dist(engine());
+	};
+}
+
 
 #endif	// RANDOM_H
