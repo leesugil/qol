@@ -19,7 +19,7 @@ std::default_random_engine& engine(std::optional<unsigned int> seed = std::nullo
 	return engine;
 }
 
-// integer in uniform distribution in [min, max)
+// integer in uniform distribution in [min, max]
 auto uniformdi(int min, int max)
 {
 	return [min, max]() {
@@ -28,7 +28,7 @@ auto uniformdi(int min, int max)
 	};
 }
 
-// integer in uniform distribution in [min, max)
+// integer in uniform distribution in [min, max]
 int randint(int min, int max)
 {
 	if (max<min) std::swap(min, max);
@@ -37,13 +37,13 @@ int randint(int min, int max)
 	return dist();
 }
 
-// integer in uniform distribution in [0, max)
+// integer in uniform distribution in [0, max]
 int randint(int max) { return randint(0, max); }
 
-// integer vector in uniform distribution in [min, max)
+// integer vector in uniform distribution in [min, max]
 void randivec(std::vector<int>& v, int min, int max) { for (auto& e : v) e = randint(min, max); }
 
-// integer vector in uniform distribution in [0, max)
+// integer vector in uniform distribution in [0, max]
 void randivec(std::vector<int>& v, int max) { for (auto& e : v) e = randint(max); }
 
 // double in uniform distribution in [min, max)
