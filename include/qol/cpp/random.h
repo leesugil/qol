@@ -51,4 +51,19 @@ void randdvec(std::vector<double>& v, double min, double max) { for (auto& e : v
 // double vector in uniform distribution in [0.0, 1.0)
 void randdvec(std::vector<double>& v) { for (auto& e : v) e = randdouble(); }
 
+// double in normal distribution N(mean, std)
+auto normald(double mean, double std)
+{
+	return [mean, std]() mutable {
+		std::normal_distribution<double> dist(mean, std);
+		return dist(engine());
+	};
+}
+
+// double in normal distribution N(0.0, 1.0)
+auto normald()
+{
+	return normald(0.0, 1.0);
+}
+
 #endif	// RANDOM_H
