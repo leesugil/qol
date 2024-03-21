@@ -1,5 +1,6 @@
-// the current version is not optimized for performance, such as constructing/destructing engine objects per each function call.
-// use the standard library functions for distributable work.
+// This header aims to make the standard library <random> more simple for non-computer programmers by providing shortcuts to some of the initialization steps.
+// By hiding the seeding and library-loading process, we can jump into using known probability distributions and picking samples from them.
+// The caveat of hiding the initialization of seed and engine is that this library cannot provide a testing environment with a specific seed.
 
 #ifndef RANDOM_H
 #define RANDOM_H
@@ -11,81 +12,80 @@
 #include <vector>
 #include <optional>
 
-// global random engine with optional seed argument
-std::default_random_engine& engine(std::optional<unsigned int> seed = std::nullopt)
-{
-	static std::default_random_engine engine(std::chrono::system_clock::now().time_since_epoch().count());
-	if (seed) engine.seed(seed.value());
-	return engine;
-}
+namespace qol {
 
-// integer in uniform distribution in [min, max]
-auto uniformdi(int min, int max)
-{
-	return [min, max]() {
-		std::uniform_int_distribution<int> dist(min, max);
-		return dist(engine());
-	};
-}
+// initiating seed and random engine
+unsigned int seed = std::chrono::system_clock::now().time_since_epoch().count();
+std::default_random_engine reng(seed);
 
-// integer in uniform distribution in [min, max]
-int randint(int min, int max)
-{
-	if (max<min) std::swap(min, max);
-	else if (min==max) return min;
-	auto dist = uniformdi(min, max);
-	return dist();
-}
+// uniform distribution - double, int
+class uniformd {
+	// double [min, max)
+	using pdf = std::uniform_distribution<double>;
+	double min, max;
+	pdf dist;
+public:
+	uniformd() : min{0.0}, max{1.0}, dist{min, max} {}
+	uniformd(double a, double b) : min{a}, max{b}, dist{min, max} {}
+	void set(double a, double b) { min=a; max=b; dist = pdf{min, max}; }
+	double operator()() { return dist(reng()); }
+};
+uniformd standard_uniformd;
+double randd() { return standard_uniformd(); }
+double uniformsample() { return randd(); }
 
-// integer in uniform distribution in [0, max]
-int randint(int max) { return randint(0, max); }
+class uniformdi {
+	// int [min, max]
+	using pdf = std::uniform_int_distribution<int>;
+	int min, max;
+	pdf dist;
+public:
+	uniformdi() : min{0}, max{100}, dist{min, max} {}
+	uniformdi(int a, int b) : min{a}, max{b}, dist{min, max} {}
+	void set(int a, int b) { min=a; max=b; dist = pdf{min, max}; }
+	int operator()() { return dist(reng()); }
+};
+uniformdi standard_uniformdi;
+int randint() { return standard_uniformdi(); }
 
-// integer vector in uniform distribution in [min, max]
-void randivec(std::vector<int>& v, int min, int max) { for (auto& e : v) e = randint(min, max); }
+// normal distribution - double
+class normald {
+	using pdf = std::normal_distribution<double>;
+	double mean, stdev;
+	pdf dist;
+public:
+	normald() : mean{0.0}, stdev{1.0}, dist{mean, stdev} {}
+	normald(double a, double b) : mean{a}, stdev{b}, dist{mean, stdev} {}
+	void set(double a, double b) { mean=a; stdev=b; dist = pdf{mean, stdev}; }
+	double operator()() { return dist(reng()); }
+};
+normald standard_normald;
+double normalsample() { return standard_normald(); }
 
-// integer vector in uniform distribution in [0, max]
-void randivec(std::vector<int>& v, int max) { for (auto& e : v) e = randint(max); }
+// binomial distribution - int
+class binomiald {
+	using pdf = std::binomial_distribution<int>;
+	double n, p;
+	pdf dist;
+public:
+	binomiald() : n{100}, p{0.5}, dist{n, p} {}
+	binomiald(double a, double b) : n{a}, p{b}, dist{n, p} {}
+	void set(double a, double b) { n=a; p=b; dist = pdf{n, p}; }
+	double operator()() { return dist(reng()); }
+};
+binomiald standard_binomiald;
+double binomialsample() { return standard_binomiald(); }
 
-// double in uniform distribution in [min, max)
-double randdouble(double min, double max)
-{
-	if (max<min) std::swap(min, max);
-	else if (min==max) return min;
-	return std::uniform_real_distribution<>{min, max}(engine());
-}
+// bernoulli distribution
 
-// double in uniform distribution in [0.0, 1.0)
-double randdouble() { return randdouble(0.0, 1.0); }
+// exponential distribution
 
-// double vector in uniform distribution in [min, max)
-void randdvec(std::vector<double>& v, double min, double max) { for (auto& e : v) e = randdouble(min, max); }
+// chi-squared distribution
 
-// double vector in uniform distribution in [0.0, 1.0)
-void randdvec(std::vector<double>& v) { for (auto& e : v) e = randdouble(); }
+// gamma distribution
 
-// double in normal distribution N(mean, std)
-auto normald(double mean, double std)
-{
-	return [mean, std]() mutable {
-		std::normal_distribution<double> dist(mean, std);
-		return dist(engine());
-	};
-}
 
-// double in normal distribution N(0.0, 1.0)
-auto normald()
-{
-	return normald(0.0, 1.0);
-}
 
-// integer in binomial distribution B(n, p)
-auto binomiald(int n, double p)
-{
-	return [n, p]() mutable {
-		std::binomial_distribution<int> dist(n, p);
-		return dist(engine());
-	};
-}
-
+}		// namespace qol
 
 #endif	// RANDOM_H
