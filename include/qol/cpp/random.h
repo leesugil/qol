@@ -21,14 +21,14 @@ std::default_random_engine reng(seed);
 // uniform distribution - double, int
 class uniformd {
 	// double [min, max)
-	using pdf = std::uniform_distribution<double>;
+	using pdf = std::uniform_real_distribution<double>;
 	double min, max;
 	pdf dist;
 public:
 	uniformd() : min{0.0}, max{1.0}, dist{min, max} {}
 	uniformd(double a, double b) : min{a}, max{b}, dist{min, max} {}
 	void set(double a, double b) { min=a; max=b; dist = pdf{min, max}; }
-	double operator()() { return dist(reng()); }
+	double operator()() { return dist(reng); }
 };
 uniformd standard_uniformd;
 double randd() { return standard_uniformd(); }
@@ -43,7 +43,7 @@ public:
 	uniformdi() : min{0}, max{100}, dist{min, max} {}
 	uniformdi(int a, int b) : min{a}, max{b}, dist{min, max} {}
 	void set(int a, int b) { min=a; max=b; dist = pdf{min, max}; }
-	int operator()() { return dist(reng()); }
+	int operator()() { return dist(reng); }
 };
 uniformdi standard_uniformdi;
 int randint() { return standard_uniformdi(); }
@@ -57,7 +57,7 @@ public:
 	normald() : mean{0.0}, stdev{1.0}, dist{mean, stdev} {}
 	normald(double a, double b) : mean{a}, stdev{b}, dist{mean, stdev} {}
 	void set(double a, double b) { mean=a; stdev=b; dist = pdf{mean, stdev}; }
-	double operator()() { return dist(reng()); }
+	double operator()() { return dist(reng); }
 };
 normald standard_normald;
 double normalsample() { return standard_normald(); }
@@ -65,13 +65,14 @@ double normalsample() { return standard_normald(); }
 // binomial distribution - int
 class binomiald {
 	using pdf = std::binomial_distribution<int>;
-	double n, p;
+	int n;
+	double p;
 	pdf dist;
 public:
 	binomiald() : n{100}, p{0.5}, dist{n, p} {}
-	binomiald(double a, double b) : n{a}, p{b}, dist{n, p} {}
-	void set(double a, double b) { n=a; p=b; dist = pdf{n, p}; }
-	double operator()() { return dist(reng()); }
+	binomiald(int a, double b) : n{a}, p{b}, dist{n, p} {}
+	void set(int a, double b) { n=a; p=b; dist = pdf{n, p}; }
+	double operator()() { return dist(reng); }
 };
 binomiald standard_binomiald;
 double binomialsample() { return standard_binomiald(); }
